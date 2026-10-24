@@ -49,6 +49,7 @@ const I = {
   full: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/>',
   jazz: '<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
   pda: '<rect x="6" y="2" width="12" height="20" rx="3"/><rect x="8.5" y="5" width="7" height="8" rx="1"/>',
+  experimental: '<path d="M9 3h6M10 3v6L5 19a1.5 1.5 0 0 0 1.3 2h11.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7.5 15h9"/>',
 };
 const icon = (k, cls = "") => `<svg viewBox="0 0 24 24" class="${cls}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[k] || ""}</svg>`;
 
@@ -57,7 +58,7 @@ const S = { state: null, meta: null, settings: null, view: "today", rev: -1, cac
 const VIEWS = [
   ["today", "Today"], ["calendar", "Calendar"], ["contacts", "Contacts"], ["tasks", "Tasks"], ["memos", "Memos"],
   "-", ["talonstar", "TalonStar 4000"], ["hypno", "Hypnospiral"], ["nowplaying", "Now Playing"], ["pclink", "PC Link"], ["pet", "Hoot Pet"], ["remote", "PDA Remote"],
-  "-", ["log", "TalonSync Log"], ["files", "Import & Export"], ["settings", "Settings"],
+  "-", ["log", "TalonSync Log"], ["files", "Import & Export"], ["experimental", "Experimental"], ["settings", "Settings"],
 ];
 const COUNT_OF = { calendar: "events", contacts: "contacts", tasks: "tasks", memos: "memos" };
 
@@ -83,7 +84,9 @@ function render() {
   const v = VIEWS.find((x) => x !== "-" && x[0] === S.view) || VIEWS[0];
   $("#view-title").textContent = v[1];
   $("#view-tools").innerHTML = "";
-  const el = $("#view"); el.innerHTML = ""; el.scrollTop = 0;
+  const view = $("#view"); view.innerHTML = ""; view.scrollTop = 0;
+  // each render draws into its own box, so a slow page that finishes after you've moved on draws into nothing
+  const el = document.createElement("div"); el.className = "page"; view.append(el);
   (R[S.view] || R.today)(el, $("#view-tools"));
 }
 
@@ -861,6 +864,133 @@ R.files = async (el) => {
   }));
 };
 
+// ---------------------------------------------------------------- Experimental: Terminal CPU, TalonOS Enhanced, BASIC
+// The same CPU the PDA's Terminal uses: its screen, its buttons, taps on the TalonOS Enhanced desktop, and a BASIC editor.
+const TERM_FAM = { 2: 1, 3: 1, 4: 1, 11: 1, 14: 1, 18: 1, 19: 1, 25: 1, 27: 1, 6: 2, 15: 2, 7: 3, 8: 4, 5: 4, 23: 4, 9: 5, 16: 6, 12: 7, 10: 8 };
+const TERM_ICON = { f: "📁", p: "🖥️", r: "🗑️", o: "🦉", A: "📅", B: "👤", C: "☑️", D: "📄", E: "🧮", F: "🕒", G: "⚙️", H: "🔄", P: "🦉" };
+function termPaint(box, t) {
+  const R8 = t.rows || [], ST = t.styles || [];
+  const cur = t.cursor, cr = cur >= 0 && cur < 1000 ? Math.floor(cur / 32) : -1, cc = cur >= 0 && cur < 1000 ? cur % 32 : -1;
+  box.classList.toggle("gui", !!t.gui); box.classList.toggle("splash", !!t.splash); box.classList.toggle("nocpu", !t.enabled);
+  if (!t.enabled) { box.innerHTML = '<div class="term-msg">No CPU: switch on the Terminal CPU above.</div>'; return; }
+  if (t.splash) { box.innerHTML = '<div class="term-msg splash">🦉<br>TalonOS Enhanced<br><small>Starting up...</small></div>'; return; }
+  const fam = (r, c) => { if (r < 0 || r > 7 || c < 0 || c > 29) return -1; const s = ST[r][c]; return TERM_FAM[s] || 0; };
+  let html = "";
+  for (let r = 0; r < 8; r++) {
+    html += '<div class="trow">';
+    const line = [...(R8[r] || "")];
+    for (let c = 0; c < 30; c++) {
+      const st = (ST[r] || [])[c] || 0;
+      let ch = line[c] || " ";
+      let cls = "tc s" + st;
+      if (t.gui) {
+        const f = TERM_FAM[st] || 0;
+        if (f) {
+          if (fam(r - 1, c) !== f && fam(r - 1, c) !== -1) cls += " bt";
+          if (fam(r + 1, c) !== f && fam(r + 1, c) !== -1) cls += " bb";
+          if (fam(r, c - 1) !== f) cls += " bl";
+          if (fam(r, c + 1) !== f) cls += " br";
+          cls += " f" + f;
+        }
+        if (st === 20 || st === 21 || st === 28 || st === 29) { cls += " ic"; ch = TERM_ICON[ch] || "▪"; }
+        if (st === 14 || st === 15) cls += " u";
+      } else if (r === cr && c === cc) cls += " cur";
+      html += `<span class="${cls}" data-r="${r}" data-c="${c}" style="--c:${c}">${ch === " " ? "&nbsp;" : esc(ch)}</span>`;
+    }
+    html += "</div>";
+  }
+  box.innerHTML = html;
+}
+R.experimental = (el) => {
+  const on = !!(S.settings && S.settings.exp_terminal);
+  el.append(h(`<div class="grid xp-page">
+    <div class="panel exp-cpu"><div class="exp-head"><div>
+      <h2>${icon("experimental")} Terminal CPU <span class="tag-exp">Experimental</span></h2>
+      <p class="muted small">TalonSync becomes the CPU for your PDA's Terminal app (Talon Pilot 2.18+; the TalonOS Enhanced desktop needs 2.19). Still being tested: it may change or go away in a later version. Off: the Terminal says "No CPU found". Everything below also works without VRChat.</p></div>
+      <span class="switch"><input type="checkbox" id="exp-on" ${on ? "checked" : ""} aria-label="Terminal CPU"><span></span></span></div></div>
+    <div class="panel"><div class="term-top"><h2>Terminal</h2><div class="term-start">
+      <button class="btn" data-start="gui">TalonOS Enhanced</button><button class="btn" data-start="basic">BASIC</button>
+      <button class="btn" data-start="local">Local terminal</button><button class="btn" data-start="library">Program Library</button>
+      <button class="btn" data-start="menu">Start menu</button></div></div>
+      <div class="term-wrap"><div class="term" id="term" tabindex="0" aria-label="The PDA's terminal screen"></div>
+        <div class="term-pad" aria-label="PDA buttons">
+          <button class="btn pad-up" data-key="up" title="Up">${icon("up")}</button>
+          <button class="btn pad-left" data-key="left" title="Left: back / break">◀</button>
+          <button class="btn pad-center" data-key="center" title="Center: open / Enter">●</button>
+          <button class="btn pad-right" data-key="right" title="Right: Start menu / repeat">▶</button>
+          <button class="btn pad-down" data-key="down" title="Down">${icon("down")}</button>
+          <p class="small faint pad-help">Arrow keys and Enter work too when the screen has focus. Click the desktop to tap it.</p></div></div>
+      <form class="term-input" id="term-form"><input type="text" id="term-line" placeholder="Type a line and press Enter, like typing on the PDA" autocomplete="off" spellcheck="false"><button class="btn primary">Send</button></form>
+      <p class="small faint" id="term-mode"></p></div>
+    <div class="panel"><h2>BASIC editor</h2>
+      <div class="ed"><div class="ed-list" id="ed-list"></div>
+        <div class="ed-main"><div class="ed-bar"><input type="text" id="ed-name" placeholder="NAME" maxlength="8" spellcheck="false" aria-label="Program name">
+          <button class="btn" id="ed-new">New</button><button class="btn" id="ed-save">Save</button><button class="btn" id="ed-del">Delete</button>
+          <span class="grow"></span><button class="btn" id="ed-load">Load into BASIC</button><button class="btn primary" id="ed-run">Run</button></div>
+          <textarea id="ed-src" spellcheck="false" aria-label="Program"></textarea>
+          <p class="small faint">Number every line: <code>10 PRINT "HELLO"</code>. The screen is 30 columns by 8 rows. Draw with <code>BOX</code>, <code>LINE</code> and <code>LOCATE</code>; type <code>HELP</code> in BASIC for every command. Saved programs go in TalonSync's Programs folder, where <code>LOAD "NAME"</code> finds them on the PDA too. Load / Run replace the program in BASIC (yours is kept as OLDPROG).</p></div></div></div>
+  </div>`));
+  const box = $("#term", el), mode = $("#term-mode", el);
+  const MODES = { menu: "Start menu", basic: "Talon Enhanced BASIC", local: "Local terminal", library: "Program Library (text)", gui: "TalonOS Enhanced" };
+  const paint = (t) => {
+    if (!t) return;
+    termPaint(box, t);
+    mode.textContent = t.enabled ? `Now showing: ${MODES[t.mode] || t.mode}${t.running ? " · a program is running (Left breaks it)" : ""}${t.waiting_input ? " · waiting for you to type" : ""}` : "";
+  };
+  const refresh = () => api("terminal").then(paint).catch(() => {});
+  refresh();
+  const timer = setInterval(() => { if (S.view !== "experimental" || !document.body.contains(box)) return clearInterval(timer); refresh(); }, 400);
+  $("#exp-on", el).onchange = (e) => saveSettings({ exp_terminal: e.target.checked }).then(() => setTimeout(refresh, 800));
+  $$("[data-start]", el).forEach((b) => (b.onclick = () => safely(() => api("terminal/start", { what: b.dataset.start })).then(paint)));
+  $$("[data-key]", el).forEach((b) => (b.onclick = () => safely(() => api("terminal/key", { key: b.dataset.key })).then(paint)));
+  box.onclick = (e) => {
+    const c = e.target.closest(".tc"); if (!c) return;
+    if (box.classList.contains("gui")) safely(() => api("terminal/tap", { row: +c.dataset.r, col: +c.dataset.c })).then(paint);
+    else $("#term-line", el).focus();
+  };
+  box.onkeydown = (e) => {
+    const k = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", Enter: "center", Escape: "left" }[e.key];
+    if (k) { e.preventDefault(); safely(() => api("terminal/key", { key: k })).then(paint); }
+    else if (e.key.length === 1) $("#term-line", el).focus();
+  };
+  $("#term-form", el).onsubmit = (e) => {
+    e.preventDefault();
+    const inp = $("#term-line", el), text = inp.value;
+    inp.value = "";
+    safely(() => api("terminal/line", { text })).then(paint);
+  };
+  // ---- editor
+  const name = $("#ed-name", el), src = $("#ed-src", el), list = $("#ed-list", el);
+  let current = "";
+  const open = (key) => api("program?name=" + encodeURIComponent(key)).then((r) => {
+    src.value = r.source; current = key; S.dirty = false;
+    name.value = key.startsWith("library:") ? key.slice(8) : key;
+    $$(".ed-item", list).forEach((x) => x.classList.toggle("on", x.dataset.p === key));
+  }).catch((e) => toast(e.message, true));
+  const loadList = () => api("programs").then((r) => {
+    list.innerHTML = `<div class="ed-head">My programs</div>${r.files.length ? r.files.map((f) => `<button class="ed-item" data-p="${esc(f)}">${esc(f)}</button>`).join("") : '<div class="small faint ed-empty">None yet. Write one and press Save.</div>'}
+      <div class="ed-head">Program Library</div>${r.library.map((p) => `<button class="ed-item" data-p="library:${esc(p.name)}" title="${esc(p.about)}">${esc(p.title.toLowerCase().replace(/\b\w/g, (m) => m.toUpperCase()).replace("Basic", "BASIC"))}<span class="faint">${esc(p.kind.toLowerCase())}</span></button>`).join("")}`;
+    $$(".ed-item", list).forEach((b) => (b.onclick = () => {
+      if (S.dirty && !confirm("Discard your unsaved changes?")) return;
+      open(b.dataset.p);
+    }));
+    $$(".ed-item", list).forEach((x) => x.classList.toggle("on", x.dataset.p === current));
+  });
+  loadList();
+  src.oninput = () => { S.dirty = true; };
+  src.onkeydown = (e) => { if (e.key === "Tab") { e.preventDefault(); document.execCommand("insertText", false, "  "); } };
+  if (!src.value) src.value = '10 CLS:BOX 0,0,3,30\n20 LOCATE 1,9:PRINT "HELLO, PDA!"\n30 LOCATE 4,0:INPUT "YOUR NAME";N$\n40 PRINT "HI ";N$;"! HOO!"\n';
+  $("#ed-new", el).onclick = () => { if (S.dirty && !confirm("Discard your unsaved changes?")) return; src.value = ""; name.value = ""; current = ""; S.dirty = false; src.focus(); };
+  $("#ed-save", el).onclick = () => safely(() => api("program/save", { name: name.value, source: src.value }), (r) => `Saved as ${r.name}`).then((r) => { if (r) { name.value = r.name; current = r.name; S.dirty = false; loadList(); } });
+  $("#ed-del", el).onclick = () => {
+    if (!current || current.startsWith("library:")) return toast("Open one of your own programs to delete it.", true);
+    if (!confirm(`Delete ${current}?`)) return;
+    safely(() => api("program/delete", { name: current }), "Deleted").then(() => { current = ""; name.value = ""; src.value = ""; S.dirty = false; loadList(); });
+  };
+  $("#ed-load", el).onclick = () => safely(() => api("terminal/load", { source: src.value, run: false }), "In BASIC: type LIST or RUN").then(paint);
+  $("#ed-run", el).onclick = () => safely(() => api("terminal/load", { source: src.value, run: true }), "Running").then(paint);
+};
+
 // -------- Settings
 async function saveSettings(patch) {
   const r = await safely(() => api("settings", patch));
@@ -945,10 +1075,6 @@ const SETTINGS_TABS = {
     ["accent", "Accent color", "color"], ["animations", "Animations", "switch"], ["compact", "Compact lists", "switch"],
     ["start_with_windows", "Start when I log in", "switch"], ["start_minimized", "Start minimized to the tray", "switch"], ["close_to_tray", "Closing the window keeps TalonSync running in the tray", "switch"],
     ["confirm_destructive", "Ask before deleting", "switch"], ["__owner"],
-  ],
-  "Experimental": [
-    ["__experimental"],
-    ["exp_terminal", "Terminal CPU: TalonOS Enhanced and Talon Enhanced BASIC (experimental)", "switch", null, "Off by default. On: TalonSync becomes the CPU for the PDA's Terminal app (Talon Pilot 2.18+; the TalonOS Enhanced desktop needs 2.19), with a start menu for TalonOS Enhanced, Talon Enhanced BASIC or the local terminal. Off: the Terminal says \"No CPU found\"."],
   ],
   "Advanced": [
     ["ack_timeout", "Bus answer timeout (seconds)", "number"], ["bus_settle_ms", "Bus settle time (ms)", "number"], ["bus_gap_ms", "Pause between transfers (ms)", "number", null, "Raise this if syncs fail in busy instances."],

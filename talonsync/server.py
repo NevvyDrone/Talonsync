@@ -115,6 +115,8 @@ class _Handler(BaseHTTPRequestHandler):
             return self._json({"error": "forbidden"}, 403)
         try:
             self._post(u.path[5:], self._body())
+        except ValueError as e:                             # a plain "can't do that" for the window to show
+            self._json({"error": str(e)}, 400)
         except Exception as e:
             traceback.print_exc()
             self._json({"error": str(e)}, 500)
@@ -137,6 +139,19 @@ class _Handler(BaseHTTPRequestHandler):
         db = app.db
         if route == "state":
             return self._json(app.state())
+        # ---- Experimental: the Terminal CPU, TalonOS Enhanced and BASIC (TalonSync 1.12)
+        if route == "terminal":
+            return self._json(app.terminal.snapshot())
+        if route == "programs":
+            from . import library
+            return self._json({"files": app.terminal.program_files(),
+                               "library": [{"name": p["name"], "title": p["title"], "kind": p["kind"], "about": p["about"]} for p in library.PROGRAMS]})
+        if route == "program":
+            name = (q.get("name") or [""])[0]
+            try:
+                return self._json({"name": name, "source": app.terminal.program_read(name)})
+            except ValueError as e:
+                return self._json({"error": str(e)}, 404)
         if route == "meta":
             return self._json({
                 "values": [asdict(v) for v in pr.VALUES], "apps": pr.APPS, "conduits": CONDUITS, "actions": ACTIONS,
@@ -193,6 +208,24 @@ class _Handler(BaseHTTPRequestHandler):
     def _post(self, route, b):
         app = self.srv.app
         db = app.db
+        t = app.terminal
+        if route == "terminal/key":
+            t.pc_key(str(b.get("key", ""))); return self._json(t.snapshot())
+        if route == "terminal/line":
+            t.pc_line(str(b.get("text", ""))); return self._json(t.snapshot())
+        if route == "terminal/tap":
+            t.pc_tap(int(b.get("row", 0)), int(b.get("col", 0))); return self._json(t.snapshot())
+        if route == "terminal/start":
+            what = str(b.get("what", ""))
+            if what not in ("menu", "gui", "basic", "local", "library"):
+                raise ValueError("Unknown choice.")
+            t.pc_start(what); return self._json(t.snapshot())
+        if route == "terminal/load":
+            t.pc_load(str(b.get("source", "")), bool(b.get("run"))); return self._json(t.snapshot())
+        if route == "program/save":
+            return self._json({"name": t.program_write(str(b.get("name", "")), str(b.get("source", "")))})
+        if route == "program/delete":
+            t.program_delete(str(b.get("name", ""))); return self._json({"ok": True})
         if route == "sync":
             ok = app.start_sync("pc")
             return self._json({"started": ok})

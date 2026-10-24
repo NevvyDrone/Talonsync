@@ -171,7 +171,8 @@ taskbar from them, so it adds no animator layers and nothing runs per frame. Tap
 over OSC. On the desktop: tap anything, or Up/Down to choose, Center to open, Left to go back, Right for the Start menu.
 
 
-**Experimental, opt in:** switch on Settings › Experimental › **Terminal CPU** first (it's off by default).
+**Experimental, opt in:** open **Experimental** in the sidebar and switch on **Terminal CPU** first (it's off by default).
+The same page mirrors the PDA's Terminal on your PC: type into it, press the PDA's buttons, click the TalonOS Enhanced desktop, and write, save, load and run BASIC programs in an editor (with the Program Library's programs to open and learn from). It all works without VRChat too.
 TalonSync is then the CPU for the PDA's **Terminal** app. When the Terminal finds it, it asks what to start: **1** TalonOS Enhanced, a classic desktop with a Start menu, taskbar, icons and windows that you can tap or drive with the buttons, with the Program Library (games, demos and a BASIC tour you can run without knowing BASIC) inside, **2** Talon Enhanced BASIC, or **3** the local terminal with built-in commands (`HELP`, `TIME`, `DATE`, `CPU`, `UPTIME`, `FILES`, `ECHO`, `LIBRARY`, `BASIC`, `MENU`). `BYE` leaves BASIC.
 The screen draws real line graphics (Talon Pilot 2.18.2+): `BOX`, `LINE` and `LOCATE` in BASIC, and `CHR$(5)`-`CHR$(31)` for shades, blocks and box pieces.
 Open Terminal on your PDA, press Center to type, Done to send. Type `HELP` for the commands. Programs you `SAVE` are kept in

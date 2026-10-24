@@ -10,6 +10,7 @@ Keyboard The PDA copies a typed line into TP/Bus/C0-14 (right-aligned, like its 
 from __future__ import annotations
 
 import os
+import re
 import queue
 import threading
 import time
@@ -93,6 +94,7 @@ class Terminal:
             except Exception:
                 pass
         self.mode = "menu"                                 # menu -> "basic" or "local"; nothing loads until you choose
+        self.session = 0                                   # counts starts, so a late power-on reset never wipes one
         self.started = time.time()
         self._stop = threading.Event()
         threading.Thread(target=self._flusher, daemon=True, name="terminal").start()
@@ -264,7 +266,11 @@ class Terminal:
 
     def attach(self):
         """The PDA powered on (or the avatar loaded, or TalonSync started): a fresh terminal, nothing loaded."""
+        ticket = self.session
         def go():
+            if self.session != ticket and self.enabled():
+                self.redraw(force=True)                    # something was started since: keep it, just resend the screen
+                return
             self.libvm.stop_flag.set()
             if not self.enabled():                         # switched off: the PDA keeps saying "No CPU found"
                 self.mode = "menu"
@@ -508,6 +514,134 @@ class Terminal:
         if rc and self.mode == "gui":
             self.gui.tap(*rc)
             self.dirty.set()
+
+    # ------------------------------------------------------------ the TalonSync window (TalonSync 1.12+)
+    # The PC can drive the same CPU the PDA uses: see the screen, type, press the PDA's buttons, tap the desktop and
+    # write BASIC in a real editor. It works without VRChat too; with a PDA attached, both show the same screen.
+    def snapshot(self) -> dict:
+        """The screen as the PDA shows it: 8 rows of (text, styles), plus the mode and the cursor."""
+        gui = self.mode == "gui"
+        if gui:
+            rows = self.gui.render().rows()
+            text = ["".join(GFX_CHAR.get(ord(screen_char(ch)), ch) if ch != "\0" else " " for ch, st in r) for r in rows]
+            styles = [[st for ch, st in r] for r in rows]
+            cur = self.gui.cursor_value()
+        else:
+            vis = self.visible()
+            text = ["".join(GFX_CHAR.get(ord(ch), ch) for ch in r).ljust(COLS)[:COLS] for r in vis]
+            styles = [[0] * COLS for _ in vis]
+            cur = float(self.cursor())
+        return {"enabled": self.enabled(), "mode": self.mode, "gui": gui, "splash": gui and cur >= 2000, "cursor": cur,
+                "rows": text, "styles": styles, "running": bool(self.worker and self.worker.is_alive()),
+                "waiting_input": self.waiting_input, "program_lines": len(self.basic.program)}
+
+    def pc_key(self, key: str):
+        """A PDA button pressed in the TalonSync window: up, down, left, right, center."""
+        cmd = {"up": CMD_UP, "down": CMD_DOWN, "left": CMD_BREAK, "right": CMD_REPEAT, "center": CMD_ENTER}.get(key)
+        if cmd is None:
+            raise ValueError("unknown key")
+        if cmd == CMD_ENTER and self.mode != "gui":
+            self.line("")                                  # Center in text mode = Done on an empty line
+        else:
+            self.on_cmd(cmd)
+
+    def pc_line(self, text: str):
+        """A line typed in the TalonSync window (no 15-letter limit here)."""
+        if not self.enabled():
+            return
+        self.line(text.replace("\r", "")[:240])
+
+    def pc_tap(self, row: int, col: int):
+        if self.enabled() and self.mode == "gui":
+            self.gui.tap(int(row), int(col))
+            self.dirty.set()
+
+    def pc_start(self, what: str):
+        if not self.enabled():
+            raise ValueError("Switch on the Terminal CPU first.")
+        self.session += 1
+        if self.worker and self.worker.is_alive():
+            self.active.stop_flag.set()
+            if self.waiting_input:
+                self.inputs.put(None)
+            self.worker.join(1.0)
+        {"menu": self.menu, "gui": self.start_gui, "basic": self.start_basic, "local": self.start_local,
+         "library": self.start_library}[what]()
+        self.dirty.set()
+
+    def pc_load(self, source: str, run: bool = False):
+        """Put a program from the editor into BASIC (your old one is kept as OLDPROG), and RUN it if asked."""
+        if not self.enabled():
+            raise ValueError("Switch on the Terminal CPU first.")
+        self.session += 1
+        if self.worker and self.worker.is_alive():
+            raise ValueError("A program is running. Press Left (break) first.")
+        b = self.basic
+        lines = [l for l in source.replace("\r", "").split("\n") if l.strip()]
+        bad = [l for l in lines if not re.match(r"\s*\d+", l)]
+        if bad:
+            raise ValueError(f"Every line needs a line number, like 10 PRINT \"HI\". This one doesn't: {bad[0][:40]}")
+        test = Basic(lambda t: None, lambda p: None)
+        for l in lines:
+            try:
+                test.enter(l)
+            except BasicError as e:
+                raise ValueError(f"?{e} ERROR in: {l[:40]}")
+        if b.program:
+            try:
+                os.makedirs(b.folder, exist_ok=True)
+                with open(os.path.join(b.folder, "OLDPROG.bas"), "w", encoding="utf-8") as f:
+                    for n in b.lines():
+                        f.write(f"{n} {b.program[n]}\n")
+            except Exception:
+                pass
+        self.return_gui = self.return_gui and self.mode == "gui"
+        self.mode = "basic"
+        self.cls()
+        self._load_into(b, "\n".join(lines))
+        self._autosave()
+        self.write(f"PROGRAM FROM TALONSYNC: {len(lines)} LINES\n")
+        if run:
+            self.write("RUN\n")
+            self.worker = threading.Thread(target=self._run, args=("RUN",), daemon=True, name="basic")
+            self.worker.start()
+        else:
+            self.write("READY.\n")
+
+    # saved programs (the Programs folder; the same files SAVE, LOAD and FILES use)
+    @staticmethod
+    def program_name(name: str) -> str:
+        n = re.sub(r"[^A-Z0-9_]", "", (name or "").upper())[:8]
+        if not n:
+            raise ValueError("Give the program a name: letters and numbers, up to 8.")
+        return n
+
+    def program_files(self):
+        return self.basic.files()
+
+    def program_read(self, name: str) -> str:
+        if name.startswith("library:"):
+            key = name.split(":", 1)[1]
+            for p in library.PROGRAMS:
+                if p["name"] == key:
+                    return p["source"]
+            raise ValueError("No such library program.")
+        path = os.path.join(self.basic.folder, self.program_name(name) + ".bas")
+        if not os.path.exists(path):
+            raise ValueError("No such program.")
+        return open(path, encoding="utf-8", errors="replace").read()
+
+    def program_write(self, name: str, source: str) -> str:
+        n = self.program_name(name)
+        os.makedirs(self.basic.folder, exist_ok=True)
+        with open(os.path.join(self.basic.folder, n + ".bas"), "w", encoding="utf-8") as f:
+            f.write(source.replace("\r", "").rstrip() + "\n")
+        return n
+
+    def program_delete(self, name: str):
+        path = os.path.join(self.basic.folder, self.program_name(name) + ".bas")
+        if os.path.exists(path):
+            os.remove(path)
 
     # ------------------------------------------------------------ the program library
     PER_PAGE = 5
