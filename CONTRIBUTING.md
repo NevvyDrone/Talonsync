@@ -22,3 +22,5 @@ TalonSync is licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE.m
    NevvyDrone products, without paying you. You keep the copyright in your own work.
 
 If you don't agree, please don't send the contribution. Credit for contributions is kept in the git history.
+
+Questions about contributing, the licence or commercial use: nevvydrone@nevvydrone.com

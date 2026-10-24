@@ -30,13 +30,13 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
 
 Open `Documentation/Talon_Pilot_Help.html` for quick fixes. Still stuck? Press **Copy support info**
 (Install Wizard footer, or Tools > Talon Pilot > Copy Support Info; in TalonSync: Settings > Connection) and
-send it with your question through the store where you bought Talon Pilot (Jinxxy) or [nevvydrone.com](https://nevvydrone.com).
+email it with your question to **[nevvydrone@nevvydrone.com](mailto:nevvydrone@nevvydrone.com)**, or message me through the store where you bought Talon Pilot (Jinxxy).
 
 ## Licence
 
 TalonSync (including Talon Enhanced BASIC and TalonOS Enhanced) is © 2026 NevvyDrone and licensed under the
 [PolyForm Noncommercial License 1.0.0](LICENSE.md). You may use, change and share it, and build on it, for any
-**non-commercial** purpose; selling it or using it commercially needs NevvyDrone's permission. Contributions are welcome:
+**non-commercial** purpose; selling it or using it commercially needs NevvyDrone's permission (ask at nevvydrone@nevvydrone.com). Contributions are welcome:
 see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 The names Talon Pilot, TalonOS, TalonSync, TalonStar 4000, Hoot-agotchi and Owl Oracle, and the owl logo, belong to
