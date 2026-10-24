@@ -30,7 +30,7 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
 
 Open `Documentation/Talon_Pilot_Help.html` for quick fixes. Still stuck? Press **Copy support info**
 (Install Wizard footer, or Tools > Talon Pilot > Copy Support Info; in TalonSync: Settings > Connection) and
-email it with your question to **[nevvydrone@nevvydrone.com](mailto:nevvydrone@nevvydrone.com)**, or message me through the store where you bought Talon Pilot (Jinxxy).
+email it with your question to **[nevvydrone@nevvydrone.com](mailto:nevvydrone@nevvydrone.com)**.
 
 ## Licence
 
