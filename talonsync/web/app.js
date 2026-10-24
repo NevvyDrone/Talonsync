@@ -948,7 +948,7 @@ const SETTINGS_TABS = {
   ],
   "Experimental": [
     ["__experimental"],
-    ["exp_terminal", "Terminal CPU: Talon Enhanced BASIC (experimental)", "switch", null, "Off by default. On: TalonSync becomes the CPU for the PDA's Terminal app (Talon Pilot 2.18+), with a start menu for Talon Enhanced BASIC or the local terminal. Off: the Terminal says \"No CPU found\"."],
+    ["exp_terminal", "Terminal CPU: TalonOS Enhanced and Talon Enhanced BASIC (experimental)", "switch", null, "Off by default. On: TalonSync becomes the CPU for the PDA's Terminal app (Talon Pilot 2.18+; the TalonOS Enhanced desktop needs 2.19), with a start menu for TalonOS Enhanced, Talon Enhanced BASIC or the local terminal. Off: the Terminal says \"No CPU found\"."],
   ],
   "Advanced": [
     ["ack_timeout", "Bus answer timeout (seconds)", "number"], ["bus_settle_ms", "Bus settle time (ms)", "number"], ["bus_gap_ms", "Pause between transfers (ms)", "number", null, "Raise this if syncs fail in busy instances."],

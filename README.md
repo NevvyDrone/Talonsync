@@ -2,7 +2,29 @@
 
 Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 
-TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonStar 4000, a cable-weather channel with a smooth jazz loop.
+TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonStar 4000, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a classic desktop that runs on your PC and shows on the PDA in VRChat.
+
+![TalonOS Enhanced on the Talon Pilot PDA: start-up screen, desktop, Start menu and Program Library](docs/screenshots/talonos_enhanced.png)
+
+## What's inside
+
+- **TalonSync:** two-way sync of your PDA's calendar, contacts, tasks, memos and settings with your PC, plus backups and
+  imports and exports in everyday formats (vCard, iCalendar, CSV, Markdown).
+- **TalonOS Enhanced** *(experimental)*: a grey-bevel desktop with icons, a Start menu, a taskbar clock and windows,
+  drawn on the PDA's screen. Tap it with your finger or stylus in VRChat, or use the PDA's buttons.
+- **Program Library:** 16 ready-made programs you can run without knowing BASIC: Guess My Number, Rock Paper Talon,
+  Feather Pile, Moon Lander, Tic-Tac-Talon, Featherword, Aerie Keeper, Talon Dice, Find the Mouse, Ponder the Owl,
+  Learn BASIC, Math Drill and four demos.
+- **Talon Enhanced BASIC:** a line-numbered home-computer BASIC with line graphics (`BOX`, `LINE`, `LOCATE`), saved
+  programs and a local terminal with its own commands.
+- **TalonStar 4000:** a retro cable-weather channel (free weather from Open-Meteo, no account) with smooth jazz, on your
+  PC and on the PDA.
+- **Now Playing, PC Link, Desktop click:** the song from your PC, PC stats and messages on the PDA, and a click-to-tap
+  mode for VRChat desktop players.
+
+| Today | TalonStar 4000 | Experimental features |
+|---|---|---|
+| ![TalonSync's Today page](docs/screenshots/pc_today.png) | ![TalonStar 4000 in TalonSync](docs/screenshots/pc_talonstar.png) | ![The Experimental settings tab](docs/screenshots/pc_experimental.png) |
 
 ## Need help?
 
@@ -132,7 +154,15 @@ Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 - **Automatic exports:** set an export folder and TalonSync writes every format after each TalonSync.
 - **Watch folder:** set a watch folder and TalonSync imports anything you drop into it.
 
-## Terminal (Talon Pilot 2.18+)
+## TalonOS Enhanced and the Terminal (Talon Pilot 2.18+, desktop 2.19+)
+
+![About box, Tic-Tac-Talon, line graphics and the text-mode library](docs/screenshots/terminal_and_basic.png)
+
+TalonOS Enhanced runs inside TalonSync; the PDA is its screen, touchscreen and buttons. TalonSync sends the screen as
+30 x 8 cells over OSC (a character and a style each), and the PDA's shader draws the title bars, bevels, icons and
+taskbar from them, so it adds no animator layers and nothing runs per frame. Taps come back from the PDA's touch grid
+over OSC. On the desktop: tap anything, or Up/Down to choose, Center to open, Left to go back, Right for the Start menu.
+
 
 **Experimental, opt in:** switch on Settings › Experimental › **Terminal CPU** first (it's off by default).
 TalonSync is then the CPU for the PDA's **Terminal** app. When the Terminal finds it, it asks what to start: **1** TalonOS Enhanced, a classic desktop with a Start menu, taskbar, icons and windows that you can tap or drive with the buttons, with the Program Library (games, demos and a BASIC tour you can run without knowing BASIC) inside, **2** Talon Enhanced BASIC, or **3** the local terminal with built-in commands (`HELP`, `TIME`, `DATE`, `CPU`, `UPTIME`, `FILES`, `ECHO`, `LIBRARY`, `BASIC`, `MENU`). `BYE` leaves BASIC.
