@@ -43,7 +43,14 @@ The names Talon Pilot, TalonOS, TalonSync, TalonStar 4000, Hoot-agotchi and Owl 
 NevvyDrone; the licence doesn't cover them, so please give forks their own name. Talon Pilot itself (the Unity avatar
 package) is sold separately under its own licence.
 
-## Build the exe (one time)
+## Get TalonSync
+
+- **Ready to run (Windows):** the Talon Pilot download includes a prebuilt **`TalonSync.exe`**. Double-click it; nothing
+  else to install.
+- **Build it yourself:** everything needed to compile your own copy is here, and the source is on GitHub:
+  [github.com/NevvyDrone/Talonsync](https://github.com/NevvyDrone/Talonsync). The steps are below.
+
+## Build the exe yourself (optional)
 
 1. **Install Python** (3.13 or 3.14 recommended) from https://www.python.org/downloads/windows/. Tick **"Add python.exe to PATH"** during install. Any Python from 3.10.1 up works (3.13 or 3.14 are the safest for building the exe; 3.10.0 has a bug, so the bat skips it). If a brand-new Python is too new for the exe builder, `Run TalonSync (without building).bat` still runs the app.
 2. **Double-click `Build TalonSync.bat`.** It:
