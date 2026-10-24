@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talon Pilot Help</title>
+<meta name="description" content="Fixes for common Talon Pilot and TalonSync problems, and how to get help.">
+<style>
+:root {
+  --bg: #eef1f6; --card: #ffffff; --ink: #172033; --dim: #56607a; --line: #d6dce8;
+  --navy: #122850; --blue: #1f4fa8; --gold: #ffc25c; --hint: #f6f8fc; --code: #edf1f8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #12161f; --card: #1b2130; --ink: #e4e8f0; --dim: #9aa4b8; --line: #2b3346; --blue: #7aa7ff; --hint: #161b27; --code: #232b3d; }
+}
+:root[data-theme="dark"] { --bg: #12161f; --card: #1b2130; --ink: #e4e8f0; --dim: #9aa4b8; --line: #2b3346; --blue: #7aa7ff; --hint: #161b27; --code: #232b3d; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { background: linear-gradient(180deg, #2a63c4, var(--navy)); color: #fff; border-bottom: 3px solid var(--gold); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+.top { display: flex; align-items: center; gap: 14px; padding: 22px 0 18px; }
+.top svg { width: 58px; height: 58px; color: #fff; flex: none; }
+h1 { margin: 0; font-size: 28px; letter-spacing: .2px; }
+.sub { color: var(--gold); font-weight: 600; font-size: 14px; }
+.search { margin: 0 0 18px; }
+.search input { width: 100%; padding: 12px 14px; font-size: 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+main.wrap { padding: 22px 16px 40px; }
+h2 { font-size: 20px; margin: 28px 0 10px; color: var(--blue); }
+details { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin: 8px 0; }
+summary { cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: "›"; display: inline-block; width: 1em; color: var(--blue); transition: transform .15s; }
+details[open] summary::before { transform: rotate(90deg); }
+.a { padding: 0 16px 14px 34px; }
+.a p { margin: 6px 0; }
+.a ol, .a ul { margin: 6px 0; padding-left: 22px; }
+b.k { background: var(--code); border-radius: 4px; padding: 0 5px; font-weight: 600; overflow-wrap: anywhere; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.box { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 10px; padding: 14px 18px; margin: 10px 0; }
+.box h3 { margin: 0 0 6px; font-size: 17px; }
+.none { display: none; color: var(--dim); padding: 10px 0; }
+footer { color: var(--dim); font-size: 13px; padding: 20px 0 40px; border-top: 1px solid var(--line); }
+a { color: var(--blue); }
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <svg viewBox="60 64 392 392" aria-hidden="true"><mask id="owlcut"> <rect x="0" y="0" width="512" height="512" fill="white"/> <rect x="146" y="176" width="220" height="70" rx="35" fill="black"/> <circle cx="208" cy="211" r="21" fill="white"/> <circle cx="304" cy="211" r="21" fill="white"/> <circle cx="208" cy="211" r="8" fill="black"/> <circle cx="304" cy="211" r="8" fill="black"/> <path d="M240 262 Q256 256 272 262 L256 292 Z" fill="black"/> <path d="M150 262 C 136 300 138 344 160 382" fill="none" stroke="black" stroke-width="12" stroke-linecap="round"/> <path d="M362 262 C 376 300 374 344 352 382" fill="none" stroke="black" stroke-width="12" stroke-linecap="round"/> <g fill="none" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"> <path d="M216 336 l14 12 l14 -12"/><path d="M268 336 l14 12 l14 -12"/> <path d="M242 368 l14 12 l14 -12"/> </g> </mask> <g mask="url(#owlcut)" fill="currentColor"> <path d="M256 112 C 300 112 330 120 352 134 L 384 74 L 392 160 C 416 196 424 236 424 280 C 424 372 352 432 256 432 C 160 432 88 372 88 280 C 88 236 96 196 120 160 L 128 74 L 160 134 C 182 120 212 112 256 112 Z"/> <path d="M214 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z"/> <path d="M276 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z"/> </g> <clipPath id="visorclip"><rect x="146" y="176" width="220" height="70" rx="35"/></clipPath> <g clip-path="url(#visorclip)"><rect x="145.80" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="145.80" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="145.80" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="145.80" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="145.80" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="145.80" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="159.55" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="159.55" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="159.55" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="159.55" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="159.55" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="159.55" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="173.30" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="173.30" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="173.30" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="173.30" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="173.30" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="173.30" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="187.05" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="187.05" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="187.05" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="187.05" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="187.05" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="187.05" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="200.80" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="200.80" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="200.80" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="200.80" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="200.80" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="200.80" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="214.55" y="156.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="214.55" y="187.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="214.55" y="199.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="214.55" y="211.00" width="14.15" height="12.07" fill="#00E436"/><rect x="214.55" y="222.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="214.55" y="234.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="228.30" y="152.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="228.30" y="184.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="228.30" y="195.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="228.30" y="207.50" width="14.15" height="12.07" fill="#00E436"/><rect x="228.30" y="219.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="228.30" y="230.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="242.05" y="149.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="242.05" y="180.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="242.05" y="192.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="242.05" y="204.00" width="14.15" height="12.07" fill="#00E436"/><rect x="242.05" y="215.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="242.05" y="227.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="255.80" y="149.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="255.80" y="180.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="255.80" y="192.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="255.80" y="204.00" width="14.15" height="12.07" fill="#00E436"/><rect x="255.80" y="215.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="255.80" y="227.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="269.55" y="152.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="269.55" y="184.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="269.55" y="195.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="269.55" y="207.50" width="14.15" height="12.07" fill="#00E436"/><rect x="269.55" y="219.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="269.55" y="230.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="283.30" y="156.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="283.30" y="187.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="283.30" y="199.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="283.30" y="211.00" width="14.15" height="12.07" fill="#00E436"/><rect x="283.30" y="222.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="283.30" y="234.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="297.05" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="297.05" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="297.05" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="297.05" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="297.05" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="297.05" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="310.80" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="310.80" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="310.80" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="310.80" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="310.80" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="310.80" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="324.55" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="324.55" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="324.55" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="324.55" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="324.55" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="324.55" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="338.30" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="338.30" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="338.30" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="338.30" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="338.30" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="338.30" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="352.05" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="352.05" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="352.05" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="352.05" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="352.05" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="352.05" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/></g> <circle cx="208" cy="211" r="21" fill="currentColor"/><circle cx="304" cy="211" r="21" fill="currentColor"/><circle cx="208" cy="211" r="8" fill="#1C1F26"/><circle cx="304" cy="211" r="8" fill="#1C1F26"/></svg>
+  <div><h1>Talon Pilot Help</h1><div class="sub">Quick fixes for Talon Pilot 2.15 and TalonSync</div></div>
+</div></header>
+<main class="wrap">
+  <div class="search"><input id="q" type="search" placeholder="Type a problem, e.g. taps, desktop, OSC, parameters" aria-label="Search the help"></div>
+  <div class="box">
+    <h3>Try these first</h3>
+    <ol>
+      <li>Turn on <b class="k">Self Interact</b> in VRChat's settings (needed to tap your own screen).</li>
+      <li>Open <b class="k">Tools › Talon Pilot › Install Wizard</b>. The Overview shows a self-check; if it says Update or Repair, press it.</li>
+      <li>Make sure TalonSync and Talon Pilot are the latest versions from your download.</li>
+    </ol>
+  </div>
+
+  <h2>Installing and updating</h2>
+  <details><summary>How do I install Talon Pilot?</summary><div class="a">
+    <ol><li>Import the Talon Pilot package into your avatar project (Unity 2022.3 with the VRChat Avatars SDK 3).</li>
+    <li>Open <b class="k">Tools › Talon Pilot › Install Wizard</b>, pick your avatar and follow the Guided Setup.</li>
+    <li>Test in Play Mode, then upload. In VRChat: <b class="k">Expressions › Talon Pilot › Power</b>.</li></ol>
+  </div></details>
+  <details><summary>How do I update to a new version?</summary><div class="a">
+    <p>Copy the new <b class="k">Assets/TalonPilot</b> folder over the old one, open the Install Wizard and press <b class="k">Update</b>. Your placement, settings, text and pet are kept. <b class="k">Tools › Talon Pilot › Patch Avatars to Latest</b> updates every avatar in the scene at once.</p>
+  </div></details>
+  <details><summary>Unity is stuck on "Compiling shader variants" or says the shader compiler timed out</summary><div class="a">
+    <p>The first import compiles the screen shader, which can take several minutes. That's normal and only happens once per set of options.</p>
+    <p>If Unity reports a timeout: choose <b class="k">Tools › Talon Pilot › Allow Long Shader Compiles</b>, restart Unity and Unity Hub, then right-click <b class="k">Assets/TalonPilot</b> and choose <b class="k">Reimport</b>.</p>
+  </div></details>
+  <details><summary>The upload fails: too many parameters or synced bits</summary><div class="a">
+    <p>Talon Pilot uses 9 to 11 of VRChat's 256 synced bits. If your avatar is already near the limit, free a few bits from other toggles, or leave out <b class="k">Beam</b> and <b class="k">TalonStar</b> (Control Center › Apps &amp; Features › Apps on your PDA), which saves 2.</p>
+    <p>If VRChat rejects the avatar for having too many parameters overall, leave out apps you don't use and turn off <b class="k">Save typed text</b> or <b class="k">Edit Calendar &amp; Contacts on the PDA</b> in Apps &amp; Features.</p>
+  </div></details>
+  <details><summary>How do I remove or repair Talon Pilot?</summary><div class="a">
+    <p>Repair: open the Install Wizard. If pieces are missing it offers <b class="k">Repair</b>. Remove: <b class="k">Control Center › Support › Remove Talon Pilot from this avatar</b>. Your FX controller is backed up first.</p>
+  </div></details>
+
+  <h2>Using it in VRChat</h2>
+  <details><summary>I can't see the PDA</summary><div class="a">
+    <ul><li>Switch it on: <b class="k">Expressions › Talon Pilot › Power</b>.</li>
+    <li>Check that your avatar isn't blocked by a performance or safety setting (other players may need to show your avatar).</li>
+    <li>In Unity, run the wizard's self-check (Overview). If the PDA was dragged onto another bone, press <b class="k">Update</b> to reconnect it.</li></ul>
+  </div></details>
+  <details><summary>The screen doesn't respond to my taps</summary><div class="a">
+    <p>Turn on <b class="k">Self Interact</b> in VRChat's settings and tap with the very tip of the stylus. If you chose Finger in the wizard, use the index finger of your other hand.</p>
+  </div></details>
+  <details><summary>The PDA or stylus is in the wrong place, or the stylus doesn't hide</summary><div class="a">
+    <p>Move or rotate them in the Hierarchy. To ride on a wing or paw, use <b class="k">Anchor points</b> in the wizard (Placement). Don't drag them onto another bone by hand; if you did, press <b class="k">Update</b> and they reconnect where you put them.</p>
+  </div></details>
+  <details><summary>Owl Oracle doesn't react to shaking</summary><div class="a">
+    <p>Give the PDA a firm flick, or press Center or tap the screen instead. The shake sensor only runs while the Oracle is open, and only if the Oracle wasn't left out in the wizard.</p>
+  </div></details>
+  <details><summary>Scope shows my voice, not the music</summary><div class="a">
+    <p>Scope's Spectrum and Waveform need AudioLink in the world. In worlds without AudioLink they switch to your voice, and the other styles (LED bars, Sunburst, Plasma and the rest) run from your voice too.</p>
+  </div></details>
+  <details><summary>The Snow Globe doesn't stir when I shake it</summary><div class="a">
+    <p>It takes a hard shake, so normal movement doesn't set it off. You can also tap the globe or press Center.</p>
+  </div></details>
+  <details><summary>The Terminal says "No CPU found"</summary><div class="a">
+    <p>Talon Enhanced BASIC runs on your PC inside TalonSync (1.10.1 or later) and is an experimental feature you opt in to: in TalonSync open Settings › <b class="k">Experimental</b> and switch on <b class="k">Terminal CPU</b>. Start TalonSync, then switch the PDA off and on (or reopen the Terminal) and the screen comes back with a menu: <b>1</b> loads Talon Enhanced BASIC, <b>2</b> opens the local terminal with its own commands (type HELP). The Terminal also needs <b class="k">PC link</b> ticked in the Install Wizard.</p>
+  </div></details>
+  <details><summary>I don't know BASIC. Can I still use the Terminal?</summary><div class="a">
+    <p>Yes. Choose <b>1 TalonOS Enhanced</b> from the Terminal's start menu, open <b>Programs</b> and press <b>Run</b>. You can tap the screen or use the buttons (Up/Down choose, Center opens, Left goes back). There are games, a talking owl, a short BASIC tour and some demos. <b>L</b> shows how a program is written and <b>E</b> opens it in BASIC so you can change it.</p>
+  </div></details>
+  <details><summary>Tapping TalonOS Enhanced does nothing</summary><div class="a">
+    <p>Taps reach TalonSync over OSC, so run <b class="k">Apply to avatar</b> again with Talon Pilot 2.19 (it lists the touch grid for OSC), and if VRChat kept an old OSC config, reset it (Action Menu › Options › OSC › Reset Config). The buttons work either way.</p>
+  </div></details>
+  <details><summary>The boot screen shows a warning or FAIL</summary><div class="a">
+    <p>Each boot line is a real check. <b>First boot, set up</b> is normal once on a new avatar. <b>A line was held</b> means something touched the screen while it started (a finger or the other hand). <b>ROM FAIL</b> means the ROM texture was changed or compressed: run <b class="k">Apply to avatar</b> again. <b>RAM FAIL</b> means the animator didn't reach the screen: run <b class="k">Repair</b> in the Control Center. <b>PC link: none</b> just means TalonSync wasn't running (it needs 1.8.7 or later).</p>
+  </div></details>
+  <details><summary>The fish don't come when I tap</summary><div class="a">
+    <p>Tap inside the tank (above the bottom bar). The food drops where you tapped and the fish take a few seconds to swim over. Press Center to drop more in the same place.</p>
+  </div></details>
+  <details><summary>An app is missing from the launcher</summary><div class="a">
+    <p>It was probably left out in the wizard. Open <b class="k">Control Center › Apps &amp; Features › Apps on your PDA</b>, tick it and press <b class="k">Apply to avatar</b>.</p>
+  </div></details>
+  <details><summary>I want to start over</summary><div class="a">
+    <p><b class="k">Expressions › Talon Pilot › Reset</b> has a factory reset that puts every preference back.</p>
+  </div></details>
+
+  <h2>Desktop mode</h2>
+  <details><summary>On desktop I can't tap anything</summary><div class="a">
+    <p>Start TalonSync 1.7 or newer and press the <b class="k">middle mouse button</b> while the dot in the middle of your screen is over the PDA (VRChat must be the window in front). Without TalonSync, use <b class="k">Expressions › Talon Pilot › Desktop › Tap where I look</b>.</p>
+  </div></details>
+  <details><summary>The PDA drifts off to the side on desktop</summary><div class="a">
+    <p>Use <b class="k">Expressions › Talon Pilot › Desktop › Bring PDA in front</b>. It also comes back by itself when you walk off or turn away. Parking needs VRChat Avatars SDK 3.7 or newer.</p>
+  </div></details>
+
+  <h2>TalonSync on your PC</h2>
+  <details><summary>TalonSync says it's waiting for VRChat or can't find the PDA</summary><div class="a">
+    <ol><li>Turn on OSC in VRChat: <b class="k">Action Menu › Options › OSC › Enabled</b>.</li>
+    <li>In TalonSync, run <b class="k">Settings › Connection › Connection doctor › Fix</b>.</li>
+    <li>Switch avatars once (VRChat sends its OSC list when an avatar loads).</li>
+    <li>On Linux, try turning OSCQuery off in TalonSync's settings.</li></ol>
+  </div></details>
+  <details><summary>Windows warns about TalonSync.exe</summary><div class="a">
+    <p>Windows SmartScreen sometimes warns about new programs it hasn't seen often. Choose <b class="k">More info › Run anyway</b> if you built or downloaded it from your Talon Pilot download. You can also run it without building: <b class="k">Run TalonSync (without building).bat</b>.</p>
+  </div></details>
+  <details><summary>TalonSync is missing features I've read about</summary><div class="a">
+    <p>You're probably running an older TalonSync.exe. Quit it from the tray and run <b class="k">Build TalonSync.bat</b> again. The version is shown under the TalonSync name.</p>
+  </div></details>
+  <details><summary>TalonStar says "No weather yet"</summary><div class="a">
+    <p>Start TalonSync on your computer and choose your city on its TalonStar page.</p>
+  </div></details>
+
+  <h2>Performance</h2>
+  <details><summary>My frame rate is lower than I'd like</summary><div class="a">
+    <ul><li>Switch the PDA off when you're not using it: almost all of its work stops.</li>
+    <li>Leave out apps you don't use (Control Center › Apps &amp; Features › Apps on your PDA). Hoot-agotchi is the biggest saving.</li>
+    <li>If you never use VRChat on a desktop, turn off Desktop mode support (Control Center › Desktop).</li>
+    <li>Control Center › Performance shows the budget.</li></ul>
+  </div></details>
+  <p class="none" id="none">Nothing matches. Try another word, or see Getting help below.</p>
+
+  <h2 id="help">Getting help</h2>
+  <div class="box">
+    <h3>Send your support info with your question</h3>
+    <ol>
+      <li>In Unity: press <b class="k">Copy support info</b> at the bottom of the Install Wizard (or <b class="k">Tools › Talon Pilot › Copy Support Info</b>).</li>
+      <li>In TalonSync: <b class="k">Settings › Connection › Copy support info</b>.</li>
+      <li>Paste both into your message with what you did and what happened. A screenshot helps.</li>
+    </ol>
+    <p>Support info holds versions, your options, the self-check and recent errors. Nothing personal.</p>
+  </div>
+  <div class="box">
+    <h3>Where to ask</h3>
+    <p>Message me through the store where you bought Talon Pilot (Jinxxy), or through <a href="https://nevvydrone.com">nevvydrone.com</a>.</p>
+    <p>Replies usually take 2 to 3 days. Support covers Talon Pilot and TalonSync themselves; I can't fix other avatars, worlds or tools, but I'll point you the right way.</p>
+  </div>
+</main>
+<footer class="wrap">Talon Pilot · Created by NevvyDrone · <a href="https://nevvydrone.com">nevvydrone.com</a>. VRChat is a trademark of its owner; Talon Pilot isn't made or endorsed by VRChat.</footer>
+<script>
+(function () {
+  var q = document.getElementById('q'), items = [].slice.call(document.querySelectorAll('main details')), none = document.getElementById('none');
+  q.addEventListener('input', function () {
+    var t = q.value.trim().toLowerCase(), shown = 0;
+    items.forEach(function (d) {
+      var hit = !t || d.textContent.toLowerCase().indexOf(t) >= 0;
+      d.style.display = hit ? '' : 'none'; if (hit) shown++;
+      d.open = !!t && hit;
+    });
+    none.style.display = shown ? 'none' : 'block';
+    [].slice.call(document.querySelectorAll('main h2')).forEach(function (h) {
+      if (h.id === 'help') return;
+      var n = h.nextElementSibling, any = false;
+      while (n && n.tagName !== 'H2') { if (n.tagName === 'DETAILS' && n.style.display !== 'none') any = true; n = n.nextElementSibling; }
+      h.style.display = any ? '' : 'none';
+    });
+  });
+})();
+</script>
+</body>
+</html>

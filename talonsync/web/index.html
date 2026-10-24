@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" data-theme="aerie">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalonSync</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><use href="#i-owl"/></svg>
+      <div><div class="brand-name">TalonSync</div><div class="brand-sub" id="brand-sub">for Talon Pilot</div></div>
+    </div>
+    <button class="sync-btn" id="sync-btn" title="TalonSync now (Ctrl+H)">
+      <span class="hs-ring"></span>
+      <svg class="hs-arrows" viewBox="0 0 64 64" aria-hidden="true"><use href="#i-sync"/></svg>
+      <span class="hs-label">TalonSync</span>
+    </button>
+    <div class="hs-hint" id="hs-hint">Press to sync your PDA</div>
+    <nav class="nav" id="nav"></nav>
+    <div class="status" id="status"></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <h1 id="view-title">Today</h1>
+      <div class="topbar-tools" id="view-tools"></div>
+    </header>
+    <section class="view" id="view"></section>
+  </main>
+</div>
+
+<div class="modal-back" id="sync-modal" hidden>
+  <div class="sync-win" role="dialog" aria-labelledby="sync-title">
+    <div class="sync-title" id="sync-title">TalonSync Progress</div>
+    <div class="sync-body">
+      <div class="sync-link">
+        <svg viewBox="0 0 48 64" class="sync-dev"><use href="#i-pda"/></svg>
+        <div class="sync-dots"><i></i><i></i><i></i><i></i><i></i></div>
+        <svg viewBox="0 0 64 56" class="sync-pc"><use href="#i-pc"/></svg>
+      </div>
+      <div class="sync-status" id="sync-status">Connecting with the handheld...</div>
+      <div class="bar"><div class="bar-fill" id="sync-bar"></div></div>
+      <ol class="sync-stages" id="sync-stages"></ol>
+      <div class="sync-summary" id="sync-summary"></div>
+    </div>
+    <div class="sync-actions"><button class="btn" id="sync-cancel">Cancel</button></div>
+  </div>
+</div>
+
+<div class="drawer-back" id="drawer-back" hidden></div>
+<aside class="drawer" id="drawer" hidden></aside>
+<div class="toasts" id="toasts"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="aur" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--aur-a)"/><stop offset="1" stop-color="var(--aur-b)"/></linearGradient>
+  </defs>
+  <symbol id="i-pet" viewBox="0 0 32 32"><path fill="url(#aur)" d="M16 3c-5 0-9 2-11 4l2 3c-1 2-2 4-2 7 0 7 5 12 11 12s11-5 11-12c0-3-1-5-2-7l2-3c-2-2-6-4-11-4z"/><circle cx="11.5" cy="15" r="4" fill="var(--sky)"/><circle cx="20.5" cy="15" r="4" fill="var(--sky)"/><circle cx="11.5" cy="15" r="1.8" fill="var(--gold)"/><circle cx="20.5" cy="15" r="1.8" fill="var(--gold)"/><path d="M16 18l-1.6 2.6h3.2z" fill="var(--gold)"/></symbol>
+  <symbol id="i-owl" viewBox="60 64 392 392"><mask id="owlcut"> <rect x="0" y="0" width="512" height="512" fill="white"/> <rect x="146" y="176" width="220" height="70" rx="35" fill="black"/> <circle cx="208" cy="211" r="21" fill="white"/> <circle cx="304" cy="211" r="21" fill="white"/> <circle cx="208" cy="211" r="8" fill="black"/> <circle cx="304" cy="211" r="8" fill="black"/> <path d="M240 262 Q256 256 272 262 L256 292 Z" fill="black"/> <path d="M150 262 C 136 300 138 344 160 382" fill="none" stroke="black" stroke-width="12" stroke-linecap="round"/> <path d="M362 262 C 376 300 374 344 352 382" fill="none" stroke="black" stroke-width="12" stroke-linecap="round"/> <g fill="none" stroke="black" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"> <path d="M216 336 l14 12 l14 -12"/><path d="M268 336 l14 12 l14 -12"/> <path d="M242 368 l14 12 l14 -12"/> </g> </mask> <g mask="url(#owlcut)" fill="url(#aur)"> <path d="M256 112 C 300 112 330 120 352 134 L 384 74 L 392 160 C 416 196 424 236 424 280 C 424 372 352 432 256 432 C 160 432 88 372 88 280 C 88 236 96 196 120 160 L 128 74 L 160 134 C 182 120 212 112 256 112 Z"/> <path d="M214 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z"/> <path d="M276 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z"/> </g> <clipPath id="visorclip"><rect x="146" y="176" width="220" height="70" rx="35"/></clipPath> <g clip-path="url(#visorclip)"><rect x="145.80" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="145.80" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="145.80" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="145.80" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="145.80" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="145.80" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="159.55" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="159.55" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="159.55" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="159.55" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="159.55" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="159.55" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="173.30" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="173.30" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="173.30" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="173.30" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="173.30" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="173.30" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="187.05" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="187.05" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="187.05" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="187.05" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="187.05" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="187.05" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="200.80" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="200.80" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="200.80" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="200.80" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="200.80" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="200.80" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="214.55" y="156.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="214.55" y="187.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="214.55" y="199.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="214.55" y="211.00" width="14.15" height="12.07" fill="#00E436"/><rect x="214.55" y="222.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="214.55" y="234.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="228.30" y="152.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="228.30" y="184.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="228.30" y="195.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="228.30" y="207.50" width="14.15" height="12.07" fill="#00E436"/><rect x="228.30" y="219.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="228.30" y="230.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="242.05" y="149.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="242.05" y="180.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="242.05" y="192.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="242.05" y="204.00" width="14.15" height="12.07" fill="#00E436"/><rect x="242.05" y="215.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="242.05" y="227.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="255.80" y="149.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="255.80" y="180.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="255.80" y="192.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="255.80" y="204.00" width="14.15" height="12.07" fill="#00E436"/><rect x="255.80" y="215.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="255.80" y="227.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="269.55" y="152.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="269.55" y="184.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="269.55" y="195.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="269.55" y="207.50" width="14.15" height="12.07" fill="#00E436"/><rect x="269.55" y="219.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="269.55" y="230.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="283.30" y="156.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="283.30" y="187.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="283.30" y="199.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="283.30" y="211.00" width="14.15" height="12.07" fill="#00E436"/><rect x="283.30" y="222.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="283.30" y="234.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="297.05" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="297.05" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="297.05" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="297.05" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="297.05" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="297.05" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="310.80" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="310.80" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="310.80" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="310.80" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="310.80" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="310.80" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="324.55" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="324.55" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="324.55" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="324.55" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="324.55" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="324.55" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="338.30" y="163.00" width="14.15" height="32.07" fill="#FF004D"/><rect x="338.30" y="194.67" width="14.15" height="12.07" fill="#FFA300"/><rect x="338.30" y="206.33" width="14.15" height="12.07" fill="#FFEC27"/><rect x="338.30" y="218.00" width="14.15" height="12.07" fill="#00E436"/><rect x="338.30" y="229.67" width="14.15" height="12.07" fill="#29ADFF"/><rect x="338.30" y="241.33" width="14.15" height="32.07" fill="#8E5CFF"/><rect x="352.05" y="159.50" width="14.15" height="32.07" fill="#FF004D"/><rect x="352.05" y="191.17" width="14.15" height="12.07" fill="#FFA300"/><rect x="352.05" y="202.83" width="14.15" height="12.07" fill="#FFEC27"/><rect x="352.05" y="214.50" width="14.15" height="12.07" fill="#00E436"/><rect x="352.05" y="226.17" width="14.15" height="12.07" fill="#29ADFF"/><rect x="352.05" y="237.83" width="14.15" height="32.07" fill="#8E5CFF"/></g> <circle cx="208" cy="211" r="21" fill="url(#aur)"/><circle cx="304" cy="211" r="21" fill="url(#aur)"/><circle cx="208" cy="211" r="8" fill="#141A2A"/><circle cx="304" cy="211" r="8" fill="#141A2A"/></symbol>
+  <symbol id="i-sync" viewBox="0 0 64 64"><path fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" d="M14 28a19 19 0 0 1 33-10"/><path fill="currentColor" d="M52 8l1 18-17-4z"/><path fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" d="M50 36a19 19 0 0 1-33 10"/><path fill="currentColor" d="M12 56l-1-18 17 4z"/></symbol>
+  <symbol id="i-pda" viewBox="0 0 48 64"><rect x="4" y="2" width="40" height="60" rx="7" fill="none" stroke="currentColor" stroke-width="3"/><rect x="10" y="9" width="28" height="30" rx="2" fill="var(--lcd)"/><circle cx="24" cy="51" r="4" fill="none" stroke="currentColor" stroke-width="2.5"/></symbol>
+  <symbol id="i-pc" viewBox="0 0 64 56"><rect x="4" y="4" width="56" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 50h16M32 40v10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+</svg>
+<script src="talonstar.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

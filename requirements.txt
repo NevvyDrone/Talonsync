@@ -1,0 +1,8 @@
+# TalonSync runtime packages (Build TalonSync.bat installs these)
+pywebview>=5.0          # the app window (uses Edge WebView2, built into Windows 10/11)
+pystray>=0.19           # tray icon
+Pillow>=10.0            # tray icon
+zeroconf>=0.131         # OSCQuery: plays nicely with other OSC apps
+winsdk>=1.0.0b10; sys_platform == "win32"   # Now Playing from Windows media controls
+psutil>=5.9             # PC Link: CPU / memory load and (Linux) temperatures
+openvr>=1.26            # PC Link: headset and controller battery from SteamVR (optional)
