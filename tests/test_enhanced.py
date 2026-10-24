@@ -55,6 +55,25 @@ t.on_cmd(45); assert t.gui.window is None
 t.on_cmd(44); [t.on_cmd(42) for _ in range(5)]; t.on_cmd(45); assert t.gui.window == "shutdown"
 t.on_cmd(45); assert t.gui.window == "safe" and "safe" in text(3)
 assert wait(lambda: t.mode == "menu", 5)
+# 1.12.1: TALONOS works from BASIC, the library list and the menu, however it's typed
+t.line("2"); assert t.mode == "basic"
+t.line("talon os"); assert t.mode == "gui", t.mode
+t.leave_gui("menu"); assert t.mode == "menu" and not t.return_gui
+t.line("Win"); assert t.mode == "gui"
+t.leave_gui("menu"); t.line("2"); t.line("LIBRARY"); assert wait(lambda: t.mode == "library"), t.mode
+t.line("TALONOS"); assert t.mode == "gui", t.mode
+t.leave_gui("menu"); t.line("3"); assert t.mode == "local"; t.line("desktop"); assert t.mode == "gui"
+assert not Terminal.wants_gui("PRINT 1") and not Terminal.wants_gui("10 WIN=1") and Terminal.wants_gui("TalonOS Enhanced")
+# an INPUT prompt still gets the word itself
+t.leave_gui("menu"); t.line("2"); t._run('10 INPUT A$') ; t._run('20 PRINT "GOT ";A$')
+t.line("RUN"); assert wait(lambda: t.waiting_input); t.line("WIN")
+assert wait(lambda: "GOT WIN" in "".join(t.visible())) and t.mode == "basic", t.mode
+# 1.12.1: the PDA powering on (or a new avatar, or TalonSync restarting) brings the desktop back if you were on it
+t.line("TALONOS"); assert t.mode == "gui"
+t.attach(); assert wait(lambda: t.mode == "gui" and t.gui.splash_until > time.time() - 0.1, 2), t.mode
+time.sleep(0.8); assert t.mode == "gui", t.mode
+# ...but not after you left it for the menu
+t.leave_gui("menu"); t.attach(); time.sleep(0.9); assert t.mode == "menu", t.mode
 # taps don't do anything outside the desktop, and nothing breaks when the CPU is switched off
 a.settings["exp_terminal"] = False; tap(1, 1); t.stop()
 print("ENHANCED OK")

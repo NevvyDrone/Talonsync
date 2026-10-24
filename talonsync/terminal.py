@@ -283,7 +283,10 @@ class Terminal:
             self.basic.stop_flag.set()
             if self.waiting_input:
                 self.inputs.put(None)
-            self.menu()
+            if self.return_gui:                            # 1.12.1: you were using TalonOS Enhanced: it comes back
+                self.start_gui()                           # (Shut Down or MENU from the desktop goes back to the menu)
+            else:
+                self.menu()
             self.redraw(force=True)
         threading.Timer(0.6, go).start()
 
@@ -353,6 +356,11 @@ class Terminal:
             return                                         # busy (a program is printing): ignore typing
         if whole.strip():
             self.last_line = whole
+        if self.wants_gui(whole) and not (self.mode == "library" and self.lib_state == "running"):
+            if self.mode == "basic":
+                self._autosave()
+            self.start_gui()                               # 1.12.1: TALONOS (or WIN, GUI, DESKTOP) works everywhere
+            return
         if self.mode == "menu":
             choice = whole.strip().upper()
             if choice in ("1", "TALONOS", "WIN"):
@@ -378,6 +386,14 @@ class Terminal:
             return
         self.worker = threading.Thread(target=self._run, args=(whole,), daemon=True, name="basic")
         self.worker.start()
+
+    @staticmethod
+    def wants_gui(text: str) -> bool:
+        """TALONOS, TALON OS, TALONOS ENHANCED, WIN, GUI or DESKTOP, however it's spaced or cased."""
+        t = text.strip().upper()
+        if not t or any(not (ch.isalpha() or ch == " ") for ch in t):
+            return False                                   # a BASIC line like 10 WIN=1 is never the desktop
+        return t.replace(" ", "") in ("TALONOS", "TALONOSENHANCED", "ENHANCED", "WIN", "GUI", "DESKTOP")
 
     # ------------------------------------------------------------ the two choices
     def start_basic(self):

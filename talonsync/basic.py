@@ -905,6 +905,7 @@ HELP_TEXT = [
     "LINE R1,C1,R2,C2 (ROW 0-7,",
     "COLUMN 0-29). CHR$(5-31) ARE",
     "LINE GRAPHICS, SEE MANUAL.",
-    "BYE leaves BASIC.",
+    "BYE leaves BASIC. TALONOS",
+    "opens the desktop.",
     "\x02 break  \x03 repeat  Up/Dn scroll",
 ]
