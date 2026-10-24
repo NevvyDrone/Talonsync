@@ -184,7 +184,7 @@ the `Programs` folder inside TalonSync's data folder, and the program you're wor
   - Regional Observations, Almanac (sun and moon) and Aerie Agenda (your calendar)
 
   It has a crawl, an old-TV look, four color themes, full screen, and a **smooth jazz** loop. Weather is from Open-Meteo: free, with no account.
-- **On the PDA:** open **TalonStar** on the launcher's second page. TalonSync sends it the weather.
+- **On the PDA:** open **TalonStar** on the launcher's first page. TalonSync sends it the weather.
   - Left/Right flip pages.
   - **Center** changes the jazz: **Off**, **Only I can hear it** (it plays in your ears only), or **Everyone nearby**. You can also set this from TalonSync.
 
