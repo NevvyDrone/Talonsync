@@ -210,7 +210,7 @@ def _run_webview(webview, app, srv, minimized):
     s = app.settings
     size = s.get("window") or {}
     win = webview.create_window(APP_NAME, srv.url, js_api=api, width=size.get("w", 1180), height=size.get("h", 760),
-                                min_size=(900, 600), background_color="#161936", hidden=bool(minimized), text_select=True)
+                                min_size=(900, 600), background_color="#0f2119", hidden=bool(minimized), text_select=True)
     api._window = win
     state = {"quitting": False, "tray": None}
 

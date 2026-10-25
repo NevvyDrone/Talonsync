@@ -1,6 +1,15 @@
 /* TalonSync - a desktop sync app, grown feathers.
    Themes are token sets; nothing below hard-codes a color. */
-:root, [data-theme="aerie"] {
+:root, [data-theme="mint"] {          /* 1.14.2: NevvyDrone's mint-green owl (the default) */
+  --sky: #0f2119; --rail: #0b1a13; --panel: #17342a; --panel-2: #1e4234; --line: #2c5644;
+  --ink: #eaf8e4; --ink-dim: #a9d1b4; --ink-faint: #6f9a7f;
+  --aur-a: #7dc79a; --aur-b: #e39a3b; --gold: #f5a843; --danger: #ff6b6b; --ok: #7dd9a0;
+  --lcd: #b8c6a0; --lcd-ink: #22301c; --lcd-dim: #7d8c6a;
+  --field: #0c1c15; --shadow: 0 18px 48px rgba(2, 10, 6, .55);
+  --r-lg: 18px; --r: 10px; --r-sm: 6px;
+  color-scheme: dark;
+}
+[data-theme="aerie"] {
   --sky: #161936; --rail: #12142c; --panel: #1f2347; --panel-2: #282d59; --line: #363b6e;
   --ink: #eceaff; --ink-dim: #a9abd8; --ink-faint: #6f72a6;
   --aur-a: #3fe0c5; --aur-b: #8b7bff; --gold: #f2c14e; --danger: #ff6b81; --ok: #4fe0a0;

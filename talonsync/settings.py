@@ -101,8 +101,8 @@ DEFAULTS = {
     "desk_click_button": "middle",    # middle | side1 | side2 | f1..f12 | a letter
     "desk_here_button": "",           # optional: "Bring PDA in front" (TP/Desk/Here); "" = none
     # ---- app
-    "theme": "aerie",                 # aerie | classic | owl | gryphon | light
-    "accent": "#4f8cff",
+    "theme": "mint",                  # mint | aerie | classic | owl | gryphon | light
+    "accent": "#7dc79a",
     "animations": True,
     "compact": False,
     "start_minimized": False,
@@ -135,7 +135,13 @@ class Settings:
             return
         try:
             with open(self.path, encoding="utf-8") as f:
-                self.update(json.load(f), save=False)
+                raw = json.load(f)
+            self.update(raw, save=False)
+            if not raw.get("look_mint"):                       # 1.14.2: the old default look becomes the mint owl, once
+                with self.lock:
+                    if self.data.get("theme") == "aerie": self.data["theme"] = "mint"
+                    if str(self.data.get("accent", "")).lower() == "#4f8cff": self.data["accent"] = "#7dc79a"
+                    self.data["look_mint"] = True
         except Exception as e:
             print(f"TalonSync: settings unreadable ({e}), using defaults")
 

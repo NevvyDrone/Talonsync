@@ -229,7 +229,7 @@ the `Programs` folder inside TalonSync's data folder, and the program you're wor
 - **TalonCast:** units, pages, seconds per page, look, animation level, CRT strength, crawl text and speed, clock format, jazz volume, and the PDA jazz mode.
 - **Files & backups:** backups to keep, auto-export, watch folder, and start over.
 - **Appearance & startup:**
-  - Themes: Aerie, Classic Desktop, Owl Night, Gryphon Gold, Daylight.
+  - Themes: Mint Owl (the default, in NevvyDrone's colours since 1.14.2), Aerie, Classic Desktop, Owl Night, Gryphon Gold, Daylight.
   - Accent color, compact lists, and animations.
   - Start with Windows, start in the tray, and close to the tray.
 - **Advanced:** bus timing and retries, for laggy instances.

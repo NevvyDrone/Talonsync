@@ -1011,7 +1011,7 @@ function bindSettings(root) {
 }
 function applyLook() {
   const s = S.settings; if (!s) return;
-  document.documentElement.dataset.theme = s.theme || "aerie";
+  document.documentElement.dataset.theme = s.theme || "mint";
   document.documentElement.classList.toggle("noanim", !s.animations);
   document.documentElement.classList.toggle("compact", !!s.compact);
   if (s.accent && s.theme !== "classic") document.documentElement.style.setProperty("--aur-a", s.accent); else document.documentElement.style.removeProperty("--aur-a");
@@ -1075,7 +1075,7 @@ const SETTINGS_TABS = {
     ["__wipe"],
   ],
   "Appearance & startup": [
-    ["theme", "Theme", "select", [["aerie", "Aerie (night sky)"], ["classic", "Classic Desktop"], ["owl", "Owl Night"], ["gryphon", "Gryphon Gold"], ["light", "Daylight"]]],
+    ["theme", "Theme", "select", [["mint", "Mint Owl"], ["aerie", "Aerie (night sky)"], ["classic", "Classic Desktop"], ["owl", "Owl Night"], ["gryphon", "Gryphon Gold"], ["light", "Daylight"]]],
     ["accent", "Accent color", "color"], ["animations", "Animations", "switch"], ["compact", "Compact lists", "switch"],
     ["start_with_windows", "Start when I log in", "switch"], ["start_minimized", "Start minimized to the tray", "switch"], ["close_to_tray", "Closing the window keeps TalonSync running in the tray", "switch"],
     ["confirm_destructive", "Ask before deleting", "switch"], ["__owner"],
