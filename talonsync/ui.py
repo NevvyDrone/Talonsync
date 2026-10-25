@@ -135,7 +135,7 @@ def _tray(app, srv, show, quit_):
     menu = pystray.Menu(
         pystray.MenuItem("Open TalonSync", lambda: show(), default=True),
         pystray.MenuItem("TalonSync now", lambda: app.start_sync("pc")),
-        pystray.MenuItem("TalonStar 4000", lambda: show("talonstar")),
+        pystray.MenuItem("TalonCast", lambda: show("talonstar")),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem("Quit", lambda: quit_()),
     )

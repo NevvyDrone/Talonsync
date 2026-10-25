@@ -1,4 +1,4 @@
-"""Compose and render the TalonStar 4000 smooth jazz loop (an original tune, "Owl Weather").
+"""Compose and render the TalonCast smooth jazz loop (an original tune, "Owl Weather").
 
 Pure numpy synthesis: FM electric piano, upright bass, brushes and ride, vibraphone melody and a
 soft pad, with a convolution room. The tail of the last bar is wrapped onto the start, so the file

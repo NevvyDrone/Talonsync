@@ -208,9 +208,9 @@ class PdaBus:
     def open_app(self, app: int):
         self.clock(pr.ADDR_OPEN_APP, ints={pr.BUS_LEN: int(app)})
 
-    # ------------------------------------------------------------ TalonStar weather
+    # ------------------------------------------------------------ TalonCast weather
     def weather(self, w: dict):
-        """Send current conditions, a 3-day forecast and the city name to the PDA's TalonStar app."""
+        """Send current conditions, a 3-day forecast and the city name to the PDA's TalonCast app."""
         from datetime import datetime
         c = w["current"]
         t8 = lambda v: max(0, min(255, int(round(v)) + 100)) if v is not None else 0
@@ -234,7 +234,7 @@ class PdaBus:
         self.clock(pr.ADDR_WX_NAME, ints={pr.BUS_C(i): c_ for i, c_ in enumerate(name)})
 
     def ticker(self, text: str):
-        """Up to 45 characters for the TalonStar ticker (3 lines of 15, drawn side by side). Empty clears it."""
+        """Up to 45 characters for the TalonCast ticker (3 lines of 15, drawn side by side). Empty clears it."""
         t = pr.clean(text, 45)
         for l in range(3):
             chunk = t[l * 15:(l + 1) * 15]

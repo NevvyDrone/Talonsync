@@ -70,7 +70,7 @@ SLOTS_BASIC, SLOTS_ALL = 24, 48
 # apps (for remote launch)
 APPS = {0: "Launcher", 1: "Calendar", 2: "Contacts", 3: "Tasks", 4: "Memos", 5: "Calc", 6: "Clock", 7: "Prefs",
         8: "TalonSync", 10: "Expense", 11: "Card Info", 12: "Security",
-        20: "Talon 3D", 23: "Hypno", 24: "Compass", 25: "Scope", 26: "Hoot Pet", 27: "TalonStar",
+        20: "Talon 3D", 23: "Hypno", 24: "Compass", 25: "Scope", 26: "Hoot Pet", 27: "TalonCast",
         28: "Owl Oracle", 29: "Moon & Stars", 30: "PC Link", 31: "Beam", 21: "TalonPop", 22: "Snow Globe", 19: "Aquarium", 18: "Terminal"}
 
 

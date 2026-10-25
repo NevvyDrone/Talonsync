@@ -336,7 +336,7 @@ class TalonSyncApp:
     def _vrchat_alive(self) -> bool:
         return bool(self.link and self.link.seconds_since_rx() < 60)
 
-    # ------------------------------------------------------------ TalonStar 4000
+    # ------------------------------------------------------------ TalonCast
     def weather_data(self) -> Dict:
         d = self.weather.data
         if not d.get("ok") and self.settings.get("ts_demo_weather", True):
@@ -366,7 +366,7 @@ class TalonSyncApp:
             self.wx_pda = datetime.now().isoformat(timespec="seconds")
             return f"Weather for {d['place'].get('name', '')} sent to the PDA"
         except Nak:
-            return "This PDA has no TalonStar app (it was left out in the Install Wizard, or Talon Pilot is older than 2.5)."
+            return "This PDA has no TalonCast app (it was left out in the Install Wizard, or Talon Pilot is older than 2.5)."
         except BusError:
             return "PDA not reachable"
 
@@ -389,7 +389,7 @@ class TalonSyncApp:
         return pr.clean("  ".join(parts), 45)
 
     def push_ticker(self, text: str):
-        """Put text on the PDA's TalonStar ticker right away (Twitch chat), unless a TalonSync is running."""
+        """Put text on the PDA's TalonCast ticker right away (Twitch chat), unless a TalonSync is running."""
         if not self.bus or (self.syncer and self.syncer.busy):
             return
         try:

@@ -56,7 +56,7 @@ DEFAULTS = {
     "chatbox_now_playing": False,
     "chatbox_format": "♪ {title} - {artist}",
     "chatbox_interval": 6.0,
-    # ---- TalonStar 4000
+    # ---- TalonCast (TalonStar 4000 until 1.14.1; settings keep their ts_ names)
     "ts_enabled": True,
     "ts_place": {},                   # {name, admin1, country, lat, lon}
     "ts_units": "imperial",           # imperial | metric
@@ -65,18 +65,18 @@ DEFAULTS = {
     "ts_extra_cities": [],
     "ts_pages": ["current", "observations", "local", "extended", "hourly", "regional", "almanac", "agenda"],
     "ts_page_seconds": 10,
-    "ts_theme": "classic",            # classic | owl | gryphon | dusk
+    "ts_theme": "mint",               # mint | owl | gryphon | dusk ("classic" from before 1.14.1 shows mint)
     "ts_crt": True,
     "ts_scanlines": 0.35,
     "ts_crawl": True,
-    "ts_crawl_text": "Thanks for watching TalonStar 4000, your local forecast from the aerie. Stay warm and stay clever!",
+    "ts_crawl_text": "Thanks for watching TalonCast, your local forecast from the aerie. Stay warm and stay clever!",
     "ts_crawl_speed": 90,
     "ts_clock24": False,
     "ts_show_seconds": True,
     "ts_music": True,
     "ts_volume": 0.55,
     "ts_animations": "full",          # full | calm | off
-    "ts_send_pda": True,              # put the weather on the Talon Pilot's TalonStar app
+    "ts_send_pda": True,              # put the weather on the Talon Pilot's TalonCast app
     "ts_pda_jazz": 1,                 # 0 off, 1 only I hear it, 2 everyone nearby hears it
     "ts_pda_ticker": "auto",          # auto (weather summary) | custom | twitch (your Twitch chat) | off
     "ts_pda_ticker_text": "",         # custom PDA ticker, up to 45 characters

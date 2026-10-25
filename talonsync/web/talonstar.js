@@ -1,14 +1,15 @@
 const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512\" width=\"640\" height=\"512\"> <g transform=\"translate(64.0,0)\"> <mask id=\"cut\"> <rect x=\"0\" y=\"0\" width=\"512\" height=\"512\" fill=\"white\"/> <!-- eyes: a goggle visor with two pupils looking ahead (2.17.2) --> <rect x=\"146\" y=\"176\" width=\"220\" height=\"70\" rx=\"35\" fill=\"black\"/> <circle cx=\"208\" cy=\"211\" r=\"21\" fill=\"white\"/> <circle cx=\"304\" cy=\"211\" r=\"21\" fill=\"white\"/> <circle cx=\"208\" cy=\"211\" r=\"8\" fill=\"black\"/> <circle cx=\"304\" cy=\"211\" r=\"8\" fill=\"black\"/> <!-- beak --> <path d=\"M240 262 Q256 256 272 262 L256 292 Z\" fill=\"black\"/> <!-- wing lines --> <path d=\"M150 262 C 136 300 138 344 160 382\" fill=\"none\" stroke=\"black\" stroke-width=\"12\" stroke-linecap=\"round\"/> <path d=\"M362 262 C 376 300 374 344 352 382\" fill=\"none\" stroke=\"black\" stroke-width=\"12\" stroke-linecap=\"round\"/> <!-- belly chevrons --> <g fill=\"none\" stroke=\"black\" stroke-width=\"10\" stroke-linecap=\"round\" stroke-linejoin=\"round\"> <path d=\"M216 336 l14 12 l14 -12\"/><path d=\"M268 336 l14 12 l14 -12\"/> <path d=\"M242 368 l14 12 l14 -12\"/> </g> </mask> <g mask=\"url(#cut)\" fill=\"#FFFFFF\"> <!-- body with ear tufts, one shape --> <path d=\"M256 112 C 300 112 330 120 352 134 L 384 74 L 392 160 C 416 196 424 236 424 280 C 424 372 352 432 256 432 C 160 432 88 372 88 280 C 88 236 96 196 120 160 L 128 74 L 160 134 C 182 120 212 112 256 112 Z\"/> <!-- feet --> <path d=\"M214 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z\"/> <path d=\"M276 426 l -10 24 h 12 l 6 -14 l 6 14 h 12 l -10 -24 Z\"/> </g> <!-- 2.17.3: the visor is an 8-bit rainbow wave (six bands in pixel steps from a retro fantasy-console palette), pupils on top --> <clipPath id=\"visor\"><rect x=\"146\" y=\"176\" width=\"220\" height=\"70\" rx=\"35\"/></clipPath> <g clip-path=\"url(#visor)\"><rect x=\"145.80\" y=\"159.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"145.80\" y=\"191.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"145.80\" y=\"202.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"145.80\" y=\"214.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"145.80\" y=\"226.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"145.80\" y=\"237.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"159.55\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"159.55\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"159.55\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"159.55\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"159.55\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"159.55\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"173.30\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"173.30\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"173.30\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"173.30\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"173.30\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"173.30\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"187.05\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"187.05\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"187.05\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"187.05\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"187.05\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"187.05\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"200.80\" y=\"159.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"200.80\" y=\"191.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"200.80\" y=\"202.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"200.80\" y=\"214.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"200.80\" y=\"226.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"200.80\" y=\"237.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"214.55\" y=\"156.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"214.55\" y=\"187.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"214.55\" y=\"199.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"214.55\" y=\"211.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"214.55\" y=\"222.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"214.55\" y=\"234.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"228.30\" y=\"152.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"228.30\" y=\"184.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"228.30\" y=\"195.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"228.30\" y=\"207.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"228.30\" y=\"219.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"228.30\" y=\"230.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"242.05\" y=\"149.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"242.05\" y=\"180.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"242.05\" y=\"192.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"242.05\" y=\"204.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"242.05\" y=\"215.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"242.05\" y=\"227.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"255.80\" y=\"149.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"255.80\" y=\"180.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"255.80\" y=\"192.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"255.80\" y=\"204.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"255.80\" y=\"215.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"255.80\" y=\"227.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"269.55\" y=\"152.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"269.55\" y=\"184.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"269.55\" y=\"195.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"269.55\" y=\"207.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"269.55\" y=\"219.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"269.55\" y=\"230.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"283.30\" y=\"156.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"283.30\" y=\"187.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"283.30\" y=\"199.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"283.30\" y=\"211.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"283.30\" y=\"222.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"283.30\" y=\"234.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"297.05\" y=\"159.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"297.05\" y=\"191.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"297.05\" y=\"202.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"297.05\" y=\"214.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"297.05\" y=\"226.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"297.05\" y=\"237.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"310.80\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"310.80\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"310.80\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"310.80\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"310.80\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"310.80\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"324.55\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"324.55\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"324.55\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"324.55\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"324.55\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"324.55\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"338.30\" y=\"163.00\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"338.30\" y=\"194.67\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"338.30\" y=\"206.33\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"338.30\" y=\"218.00\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"338.30\" y=\"229.67\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"338.30\" y=\"241.33\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/><rect x=\"352.05\" y=\"159.50\" width=\"14.15\" height=\"32.07\" fill=\"#FF004D\"/><rect x=\"352.05\" y=\"191.17\" width=\"14.15\" height=\"12.07\" fill=\"#FFA300\"/><rect x=\"352.05\" y=\"202.83\" width=\"14.15\" height=\"12.07\" fill=\"#FFEC27\"/><rect x=\"352.05\" y=\"214.50\" width=\"14.15\" height=\"12.07\" fill=\"#00E436\"/><rect x=\"352.05\" y=\"226.17\" width=\"14.15\" height=\"12.07\" fill=\"#29ADFF\"/><rect x=\"352.05\" y=\"237.83\" width=\"14.15\" height=\"32.07\" fill=\"#8E5CFF\"/></g> <circle cx=\"208\" cy=\"211\" r=\"21\" fill=\"#FFFFFF\"/><circle cx=\"304\" cy=\"211\" r=\"21\" fill=\"#FFFFFF\"/> <circle cx=\"208\" cy=\"211\" r=\"8\" fill=\"#1C1F26\"/><circle cx=\"304\" cy=\"211\" r=\"8\" fill=\"#1C1F26\"/> </g> </svg>";
-/* TalonStar 4000 - a 90s cable-weather style local forecast, drawn on a 640 x 480 canvas.
-   Original look: TalonStar branding, owl bug, procedural animated icons. */
+/* TalonCast (TalonStar 4000 until 1.14.1) - a 90s cable-weather style local forecast, drawn on a 640 x 480 canvas.
+   Original look: TalonCast branding, owl bug, procedural animated icons. */
 (function () {
   "use strict";
   const W = 640, H = 480;
   const FONT = '"Bahnschrift SemiBold Condensed", "Bahnschrift Condensed", Bahnschrift, "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif';
 
   const THEMES = {
-    classic: { sky: ["#1a1258", "#2b2f9a", "#1b2a7a"], band: ["#b4430c", "#f39a2c", "#ffd36a"], panel: ["#26338f", "#1c2670"], edge: "#7d8cf0", edgeDark: "#0d1240",
-               title: "#ffe35a", label: "#dfe4ff", value: "#ffe35a", text: "#ffffff", crawl: ["#2a2f6e", "#141842"], accent: "#7fd2ff", map: ["#173d4a", "#0f2b36"] },
+    // 1.14.1: NevvyDrone's mint-green owl colours (the default; replaces the old blue-and-orange "classic")
+    mint:    { sky: ["#0d2219", "#1c4636", "#123327"], band: ["#5ca87c", "#7dc79a", "#d6f4c5"], panel: ["#1a3b2c", "#102a1f"], edge: "#7dc79a", edgeDark: "#06140e",
+               title: "#f5a843", head: "#123222", label: "#cdf1c8", value: "#f5a843", text: "#fffff2", crawl: ["#1c4030", "#0c1f17"], accent: "#c0313a", map: ["#1b4434", "#0f2b20"] },
     owl:     { sky: ["#1d0f2e", "#3a1d55", "#24113a"], band: ["#6d2d8c", "#c25fd0", "#f3b6ff"], panel: ["#3a2160", "#28164a"], edge: "#b28cf0", edgeDark: "#12081e",
                title: "#ffd27a", label: "#eadcff", value: "#ffd27a", text: "#ffffff", crawl: ["#2c1846", "#170c26"], accent: "#ff9fd8", map: ["#2a2246", "#1a1530"] },
     gryphon: { sky: ["#0b2a2c", "#12474b", "#0c3033"], band: ["#8a5a0c", "#e2a530", "#ffe08a"], panel: ["#14545a", "#0e3c41"], edge: "#6fd6c8", edgeDark: "#041517",
@@ -32,7 +33,7 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
       this.c = canvas;
       this.g = canvas.getContext("2d");
       this.w = null; this.extras = {};
-      this.s = { pages: Object.keys(PAGE_TITLES), page_seconds: 10, theme: "classic", crt: true, scanlines: 0.35, crawl: true,
+      this.s = { pages: Object.keys(PAGE_TITLES), page_seconds: 10, theme: "mint", crt: true, scanlines: 0.35, crawl: true,
                  crawl_text: "", crawl_speed: 90, clock24: false, show_seconds: true, animations: "full" };
       this.queue = []; this.qi = 0; this.pageStart = 0; this.prev = null; this.prevStart = 0;
       this.crawlX = W; this.running = false; this.t0 = performance.now();
@@ -52,7 +53,7 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
       Object.assign(this.s, s);
       if (pagesChanged) this.rebuild(true);
     }
-    get th() { return THEMES[this.s.theme] || THEMES.classic; }
+    get th() { return THEMES[this.s.theme] || THEMES.mint; }           // an old "classic" setting gets the mint look
     get anim() { return this.s.animations || "full"; }
     now() { return (performance.now() - this.t0) / 1000; }
     start() { if (!this.running) { this.running = true; this.rebuild(false); requestAnimationFrame(this._frame); } }
@@ -117,8 +118,9 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
       g.textAlign = align; g.textBaseline = "alphabetic";
       if (opts.maxW) { while (g.measureText(str).width > opts.maxW && size > 10) { size -= 1; g.font = `${opts.weight || ""} ${size}px ${FONT}`; } }
       g.lineJoin = "round";
-      g.fillStyle = "rgba(0,0,0,.85)"; g.fillText(str, x + size * 0.09, y + size * 0.09);          // drop shadow
-      g.strokeStyle = "#000"; g.lineWidth = Math.max(2, size * 0.12); g.strokeText(str, x, y);       // outline
+      const dark = this.th.head && color === this.th.head;                                         // dark ink on the mint band: a light edge
+      g.fillStyle = dark ? "rgba(230,250,220,.7)" : "rgba(0,0,0,.85)"; g.fillText(str, x + size * 0.07, y + size * 0.07);   // drop shadow
+      g.strokeStyle = dark ? "rgba(214,244,197,.9)" : "#000"; g.lineWidth = Math.max(2, size * (dark ? 0.08 : 0.12)); g.strokeText(str, x, y);   // outline
       g.fillStyle = color; g.fillText(str, x, y);
       return g.measureText(str).width;
     }
@@ -189,8 +191,9 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
       const k = this.anim === "full" ? ease(age / 0.45) : 1;
       g.save(); g.globalAlpha = k;
       const dx = (1 - k) * -30;
-      if (l2) { this.txt(l1, 86 + dx, 46, 26, th.title); this.txt(l2, 86 + dx, 74, 26, th.title); }
-      else this.txt(l1, 86 + dx, 62, 32, th.title);
+      const ink = th.head || th.title;                                    // the page title on the header band
+      if (l2) { this.txt(l1, 86 + dx, 46, 26, ink); this.txt(l2, 86 + dx, 74, 26, ink); }
+      else this.txt(l1, 86 + dx, 62, 32, ink);
       if (p.page === "local" && this.queue.filter((q) => q.page === "local").length > 1) this.txt(`${p.sub + 1}/${this.queue.filter((q) => q.page === "local").length}`, 300, 74, 16, th.text);
       g.restore();
       // clock
@@ -199,9 +202,9 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
       if (!this.s.clock24) h = h % 12 || 12;
       const mm = String(d.getMinutes()).padStart(2, "0"), ss = String(d.getSeconds()).padStart(2, "0");
       const time = (this.s.clock24 ? String(h).padStart(2, "0") : String(h)) + ":" + mm + (this.s.show_seconds ? ":" + ss : "") + (this.s.clock24 ? "" : " " + ampm);
-      this.txt(time, 624, 46, 24, th.text, "right");
+      this.txt(time, 624, 46, 24, th.head || th.text, "right");
       const date = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }).toUpperCase().replace(",", "");
-      this.txt(date, 624, 72, 20, th.text, "right");
+      this.txt(date, 624, 72, 20, th.head || th.text, "right");
     }
 
     // the TalonStar bug (1.9.1): the Talon Pilot owl in a storm - rain falling past it and a lightning bolt that flashes
@@ -305,10 +308,10 @@ const OWL_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 640 512
 
     noData(age) {
       const th = this.th; this.panel();
-      this.txt("TalonStar 4000", W / 2, 200, 40, th.title, "center");
+      this.txt("TalonCast", W / 2, 200, 40, th.title, "center");
       const msg = (this.w && this.w.error) || "Waiting for the weather...";
       this.txt(msg, W / 2, 250, 22, th.text, "center", { maxW: 560 });
-      this.txt("Set your city in TalonStar settings.", W / 2, 290, 20, th.label, "center");
+      this.txt("Set your city in TalonCast settings.", W / 2, 290, 20, th.label, "center");
     }
 
     pCurrent(w, age, t) {

@@ -1,7 +1,7 @@
-"""Weather for TalonStar 4000, from Open-Meteo (free, no account, no key).
+"""Weather for TalonCast, from Open-Meteo (free, no account, no key).
 
-Everything is normalized into one plain dict (see Weather.to_dict) that the TalonStar pages in the
-window and the TalonStar app on the PDA both use.
+Everything is normalized into one plain dict (see Weather.to_dict) that the TalonCast pages in the
+window and the TalonCast app on the PDA both use.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from typing import Callable, Dict, List, Optional
 
 FORECAST = "https://api.open-meteo.com/v1/forecast"
 GEOCODE = "https://geocoding-api.open-meteo.com/v1/search"
-UA = {"User-Agent": "TalonSync/1.0 (TalonStar 4000)"}
+UA = {"User-Agent": "TalonSync/1.0 (TalonCast)"}
 
 # ---------------------------------------------------------------- WMO weather codes
 # code -> (long text, short text for the 4000-style panels, icon key, PDA icon number)
@@ -338,7 +338,7 @@ class WeatherService:
         place = self.place()
         metric = self.s.get("ts_units", "imperial") == "metric"
         if place is None:
-            self.data = {"ok": False, "error": "Choose your city in TalonStar settings."}
+            self.data = {"ok": False, "error": "Choose your city in TalonCast settings."}
             return self.data
         try:
             raw = fetch_raw(place["lat"], place["lon"], metric)
@@ -350,12 +350,12 @@ class WeatherService:
             try:
                 region = fetch_many_current(pts, metric)
             except Exception as e:
-                self.log(f"TalonStar: regional weather failed ({e})")
+                self.log(f"TalonCast: regional weather failed ({e})")
                 region, pts = [], []
             w = normalize(raw, place, metric, region, pts)
             with self._lock:
                 self.data = w
-            self.log(f"TalonStar: {place.get('name')} {w['current']['temp']}{w['units']['temp']} {w['current']['text']}")
+            self.log(f"TalonCast: {place.get('name')} {w['current']['temp']}{w['units']['temp']} {w['current']['text']}")
         except Exception as e:
             msg = f"Couldn't get the weather ({e})."
             with self._lock:
@@ -364,12 +364,12 @@ class WeatherService:
                     self.data["error"] = msg
                 else:
                     self.data = {"ok": False, "error": msg}
-            self.log("TalonStar: " + msg)
+            self.log("TalonCast: " + msg)
         if self.on_update:
             try:
                 self.on_update(self.data)
             except Exception as e:
-                self.log(f"TalonStar: PDA update failed ({e})")
+                self.log(f"TalonCast: PDA update failed ({e})")
         return self.data
 
 

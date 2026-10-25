@@ -57,7 +57,7 @@ const icon = (k, cls = "") => `<svg viewBox="0 0 24 24" class="${cls}" fill="non
 const S = { state: null, meta: null, settings: null, view: "today", rev: -1, cache: {}, sel: {}, dirty: false };
 const VIEWS = [
   ["today", "Today"], ["calendar", "Calendar"], ["contacts", "Contacts"], ["tasks", "Tasks"], ["memos", "Memos"],
-  "-", ["talonstar", "TalonStar 4000"], ["hypno", "Hypnospiral"], ["nowplaying", "Now Playing"], ["pclink", "PC Link"], ["pet", "Hoot Pet"], ["remote", "PDA Remote"],
+  "-", ["talonstar", "TalonCast"], ["hypno", "Hypnospiral"], ["nowplaying", "Now Playing"], ["pclink", "PC Link"], ["pet", "Hoot Pet"], ["remote", "PDA Remote"],
   "-", ["log", "TalonSync Log"], ["files", "Import & Export"], ["experimental", "Experimental"], ["settings", "Settings"],
 ];
 const COUNT_OF = { calendar: "events", contacts: "contacts", tasks: "tasks", memos: "memos" };
@@ -470,7 +470,7 @@ R.notepad = async (el, tools) => {
   $("#ink-imp").onchange = async (e) => { await importFiles(e.target.files, "notepad"); refreshView(); };
 };
 
-// -------- TalonStar 4000
+// -------- TalonCast
 const TS = {
   star: null, jazz: new TalonJazz("talonstar_jazz.ogg"), timer: null, data: null,
   settingsFor(s) { return { pages: s.ts_pages, page_seconds: s.ts_page_seconds, theme: s.ts_theme, crt: s.ts_crt, scanlines: s.ts_scanlines, crawl: s.ts_crawl, crawl_text: s.ts_crawl_text, crawl_speed: s.ts_crawl_speed, clock24: s.ts_clock24, show_seconds: s.ts_show_seconds, animations: s.ts_animations }; },
@@ -523,17 +523,17 @@ const TS = {
       <h3 style="margin-top:14px">Pages</h3>
       ${pages.map(([k, t]) => `<label class="check" style="margin:5px 0"><input type="checkbox" data-page="${k}" ${s.ts_pages.includes(k) ? "checked" : ""}>${t.join(" ").trim()}</label>`).join("")}
       <div class="set"><div class="lab">Seconds per page</div><div class="ctl"><input type="number" min="4" max="60" value="${s.ts_page_seconds}" id="ts-sec" style="width:80px"></div></div>
-      <div class="set"><div class="lab">Look</div><div class="ctl"><select id="ts-theme">${TalonStarThemes.map((t) => `<option ${t === s.ts_theme ? "selected" : ""} value="${t}">${{ classic: "Classic blue", owl: "Owl night", gryphon: "Gryphon gold", dusk: "Dusk" }[t]}</option>`).join("")}</select></div></div>
+      <div class="set"><div class="lab">Look</div><div class="ctl"><select id="ts-theme">${TalonStarThemes.map((t) => `<option ${t === s.ts_theme ? "selected" : ""} value="${t}">${{ mint: "Mint owl", owl: "Owl night", gryphon: "Gryphon gold", dusk: "Dusk" }[t]}</option>`).join("")}</select></div></div>
       <label class="check" style="margin:8px 0"><input type="checkbox" id="ts-crt" ${s.ts_crt ? "checked" : ""}>Old TV glass and scanlines</label>
       <label class="check" style="margin:8px 0"><input type="checkbox" id="ts-crawl" ${s.ts_crawl ? "checked" : ""}>Scrolling crawl</label>
       <label class="field">Ticker message (this window)<input type="text" id="ts-crawl-text" value="${esc(s.ts_crawl_text)}"></label>
       <h3 style="margin-top:16px">On your Talon Pilot</h3>
-      <label class="check" style="margin:6px 0"><input type="checkbox" id="ts-pda" ${s.ts_send_pda ? "checked" : ""}>Send the weather to the PDA's TalonStar app</label>
+      <label class="check" style="margin:6px 0"><input type="checkbox" id="ts-pda" ${s.ts_send_pda ? "checked" : ""}>Send the weather to the PDA's TalonCast app</label>
       <label class="field" style="margin-top:8px">Ticker on the PDA<select id="ts-tick-mode"><option value="auto">Weather summary</option><option value="custom">My own message</option><option value="twitch">Twitch chat</option><option value="off">Off</option></select></label>
       <label class="field" id="ts-tick-row" style="margin-top:8px">PDA ticker message <span class="faint" id="ts-tick-count"></span><input type="text" id="ts-tick-text" maxlength="45" value="${esc(s.ts_pda_ticker_text)}" placeholder="Up to 45 letters"></label>
       <label class="field" style="margin-top:8px">Jazz on the PDA<select id="ts-pda-jazz"><option value="0">Off</option><option value="1">Only I can hear it</option><option value="2">Everyone nearby can hear it</option></select></label>
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="ts-push">Send to PDA now</button><button class="btn" id="ts-open">Open TalonStar on PDA</button><button class="btn ghost" id="ts-ref">${icon("refresh")}Refresh</button></div>
-      <p class="small faint" style="margin-top:12px">More options in Settings › TalonStar 4000.</p>`;
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn" id="ts-push">Send to PDA now</button><button class="btn" id="ts-open">Open TalonCast on PDA</button><button class="btn ghost" id="ts-ref">${icon("refresh")}Refresh</button></div>
+      <p class="small faint" style="margin-top:12px">More options in Settings › TalonCast.</p>`;
     $("#ts-pda-jazz").value = String(s.ts_pda_jazz);
     $("#ts-tick-mode").value = s.ts_pda_ticker || "auto";
     const tickUi = () => { $("#ts-tick-row").style.display = $("#ts-tick-mode").value === "custom" ? "" : "none"; $("#ts-tick-count").textContent = `${$("#ts-tick-text").value.length}/45`; };
@@ -713,7 +713,7 @@ R.pclink = (el) => {
         <label class="field">Channel<input type="text" data-k="twitch_channel" value="${esc(s.twitch_channel)}" placeholder="your channel name"></label>
         <div id="pc-twitch" class="small" style="margin:6px 0 4px"></div>
         ${sw("pc_twitch_mentions", "@mentions become PDA messages")}
-        <p class="small faint">To show the chat on the PDA's TalonStar ticker, choose <b>Twitch chat</b> under TalonStar › Ticker on the PDA. Read-only: no login needed.</p>
+        <p class="small faint">To show the chat on the PDA's TalonCast ticker, choose <b>Twitch chat</b> under TalonCast › Ticker on the PDA. Read-only: no login needed.</p>
       </div>
     </div></div>`));
   bindSettings(el);
@@ -1027,7 +1027,7 @@ const SETTINGS_TABS = {
     ["sound", "Sounds", "switch"], ["chirp_on_done", "Chirp when a TalonSync finishes", "switch"],
     ["__conduits"],
   ],
-  "TalonStar 4000": [
+  "TalonCast": [
     ["__location"],
     ["ts_enabled", "Get the weather", "switch"],
     ["ts_units", "Units", "select", [["imperial", "°F, mph, inches"], ["metric", "°C, km/h, hPa"]]],
@@ -1158,11 +1158,11 @@ function wipeBox() {
 }
 function locationBox() {
   const p = S.settings.ts_place || {};
-  const el = h(`<div class="set"><div class="lab">Location</div><div class="help" id="loc-now">${p.name ? esc([p.name, p.admin1, p.country].filter(Boolean).join(", ")) : "Not set yet - TalonStar shows sample weather."}</div>
+  const el = h(`<div class="set"><div class="lab">Location</div><div class="help" id="loc-now">${p.name ? esc([p.name, p.admin1, p.country].filter(Boolean).join(", ")) : "Not set yet - TalonCast shows sample weather."}</div>
     <div class="ctl" style="flex-wrap:wrap;gap:6px"><input type="search" id="loc-q" placeholder="City" style="width:160px"><button class="btn" id="loc-find">Find</button><button class="btn ghost" id="loc-here">Where this PC is</button></div></div>`);
   const res = h(`<div id="loc-res"></div>`);
   const wrap = h("<div></div>"); wrap.append(el, res);
-  const use = async (place) => { await saveSettings({ ts_place: place }); $("#loc-now", el).textContent = [place.name, place.admin1, place.country].filter(Boolean).join(", "); res.innerHTML = ""; toast(`TalonStar is now set to ${place.name}`); };
+  const use = async (place) => { await saveSettings({ ts_place: place }); $("#loc-now", el).textContent = [place.name, place.admin1, place.country].filter(Boolean).join(", "); res.innerHTML = ""; toast(`TalonCast is now set to ${place.name}`); };
   const find = async () => {
     const q = $("#loc-q", el).value.trim(); if (!q) return;
     const r = await safely(() => api("geocode?q=" + encodeURIComponent(q)));
@@ -1178,7 +1178,7 @@ function locationBox() {
 function askName() {
   const back = h(`<div class="modal-back" id="name-modal"><div class="panel" style="width:min(440px,92vw);padding:26px">
     <h2 style="margin:0 0 6px">Hoot! Welcome to TalonSync.</h2>
-    <p class="faint" style="margin:0 0 16px">What should we call you? TalonSync and TalonStar greet you with it. You can change it later in Settings › Appearance &amp; startup.</p>
+    <p class="faint" style="margin:0 0 16px">What should we call you? TalonSync and TalonCast greet you with it. You can change it later in Settings › Appearance &amp; startup.</p>
     <input type="text" id="name-in" maxlength="20" placeholder="Your name or nickname" style="width:100%">
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px"><button class="btn" id="name-skip">Not now</button><button class="btn primary" id="name-ok">Save</button></div>
   </div></div>`);
@@ -1195,7 +1195,7 @@ function askName() {
   inp.onkeydown = (e) => { if (e.key === "Enter") save(); if (e.key === "Escape") done(); };
 }
 function ownerBox() {
-  const el = h(`<div class="set"><div class="lab">Your name</div><div class="help">What TalonSync calls you. Also shown on TalonStar's agenda page.</div><div class="ctl"><input type="text" id="owner"></div></div>`);
+  const el = h(`<div class="set"><div class="lab">Your name</div><div class="help">What TalonSync calls you. Also shown on TalonCast's agenda page.</div><div class="ctl"><input type="text" id="owner"></div></div>`);
   api("device").then((d) => { $("#owner", el).value = d.owner; });
   $("#owner", el).onchange = (e) => safely(() => api("device", { owner: e.target.value }), "Saved");
   return el;

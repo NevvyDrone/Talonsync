@@ -351,7 +351,7 @@ html.noanim *, html.noanim *::before, html.noanim *::after { animation: none !im
 html.compact .item { padding: 5px 10px; }
 html.compact .set { padding: 8px 0; }
 
-/* ---------------------------------------------------------------- TalonStar 4000 */
+/* ---------------------------------------------------------------- TalonCast */
 .ts-wrap { padding: 12px 4px 4px 12px; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; align-items: start; }
 .ts-stage { position: relative; aspect-ratio: 4 / 3; width: 100%; max-height: calc(100vh - 120px); background: #000; border-radius: 22px; overflow: hidden;
   box-shadow: 0 0 0 10px #24262f, 0 0 0 12px #3a3d4a, var(--shadow); }

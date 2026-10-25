@@ -2,7 +2,7 @@
 
 Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 
-TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonStar 4000, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a small windowed OS that runs on your PC and shows on the PDA in VRChat.
+TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonCast, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a small windowed OS that runs on your PC and shows on the PDA in VRChat.
 
 ![TalonOS Enhanced on the Talon Pilot PDA: start-up screen, desktop, Start menu, Tic-Tac-Talon, and in the Skyglass look Calculator, Control Panel, Featherword and Notepad](docs/screenshots/talonos_enhanced.png)
 
@@ -21,14 +21,14 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
   ([the SDK guide](docs/TalonOS_SDK.md)).
 - **Talon Enhanced BASIC:** a line-numbered home-computer BASIC with line graphics (`BOX`, `LINE`, `LOCATE`), saved
   programs and a local terminal with its own commands.
-- **TalonStar 4000:** a retro cable-weather channel (free weather from Open-Meteo, no account) with smooth jazz, on your
+- **TalonCast:** a retro cable-weather channel (free weather from Open-Meteo, no account) with smooth jazz, on your
   PC and on the PDA.
 - **Now Playing, PC Link, Desktop click:** the song from your PC, PC stats and messages on the PDA, and a click-to-tap
   mode for VRChat desktop players.
 
-| Today | TalonStar 4000 | Experimental features |
+| Today | TalonCast | Experimental features |
 |---|---|---|
-| ![TalonSync's Today page](docs/screenshots/pc_today.png) | ![TalonStar 4000 in TalonSync](docs/screenshots/pc_talonstar.png) | ![The Experimental settings tab](docs/screenshots/pc_experimental.png) |
+| ![TalonSync's Today page](docs/screenshots/pc_today.png) | ![TalonCast in TalonSync](docs/screenshots/pc_talonstar.png) | ![The Experimental settings tab](docs/screenshots/pc_experimental.png) |
 
 ## Need help?
 
@@ -43,7 +43,7 @@ TalonSync (including Talon Enhanced BASIC and TalonOS Enhanced) is © 2026 Nevvy
 **non-commercial** purpose; selling it or using it commercially needs NevvyDrone's permission (ask at nevvydrone@nevvydrone.com). Contributions are welcome:
 see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The names Talon Pilot, TalonOS, TalonSync, TalonStar 4000, Hoot-agotchi and Owl Oracle, and the owl logo, belong to
+The names Talon Pilot, TalonOS, TalonSync, TalonCast, Hoot-agotchi and Owl Oracle, and the owl logo, belong to
 NevvyDrone; the licence doesn't cover them, so please give forks their own name. Talon Pilot itself (the Unity avatar
 package) is sold separately under its own licence.
 
@@ -128,7 +128,7 @@ VRChat doesn't run on a Mac, but TalonSync on a Mac can sync with VRChat on a Wi
 
 ## Set up VRChat
 
-1. **Update your avatar.** Install or patch Talon Pilot **2.5** on it, with **PC link** on, then upload. Version 2.5 adds Now Playing, TalonStar and exact settings sync.
+1. **Update your avatar.** Install or patch Talon Pilot **2.5** on it, with **PC link** on, then upload. Version 2.5 adds Now Playing, TalonCast and exact settings sync.
 2. **Turn on OSC.** In VRChat, open the Action Menu › Options › OSC › **Enabled**.
 3. **Fix a stale OSC config if needed.** If you used the avatar with OSC before updating, VRChat keeps an old OSC config for it. Use Settings › Connection › **Connection doctor** › **Fix**, then switch avatars once.
 
@@ -207,15 +207,17 @@ the `Programs` folder inside TalonSync's data folder, and the program you're wor
 - **Chatbox:** it can also post the song to your VRChat chatbox.
 - **Messages:** you can send your PDA a short message from the Now Playing page.
 
-## TalonStar 4000
+## TalonCast
 
-- **On the PC:** pick your city in the TalonStar page and the pages cycle on their own:
+(Called TalonStar 4000 before TalonSync 1.14.1 and Talon Pilot 2.21; your settings carry over.)
+
+- **On the PC:** pick your city in the TalonCast page and the pages cycle on their own:
   - Current Conditions, Latest Observations and Local Forecast
   - Extended Forecast and Hourly Outlook
   - Regional Observations, Almanac (sun and moon) and Aerie Agenda (your calendar)
 
   It has a crawl, an old-TV look, four color themes, full screen, and a **smooth jazz** loop. Weather is from Open-Meteo: free, with no account.
-- **On the PDA:** open **TalonStar** on the launcher's first page. TalonSync sends it the weather.
+- **On the PDA:** open **TalonCast** on the launcher's first page. TalonSync sends it the weather.
   - Left/Right flip pages.
   - **Center** changes the jazz: **Off**, **Only I can hear it** (it plays in your ears only), or **Everyone nearby**. You can also set this from TalonSync.
 
@@ -224,7 +226,7 @@ the `Programs` folder inside TalonSync's data folder, and the program you're wor
 - **Connection:** ports, OSCQuery (on by default, so other OSC apps can run alongside), a **Demo PDA** to try everything without VRChat, and the connection doctor.
 - **TalonSync:** auto-sync timer, sync on start, conflict rule, conduits, and the chirp.
 - **Now Playing:** source, playback bar, swap lines, ALL CAPS, hide when paused, and the chatbox format.
-- **TalonStar 4000:** units, pages, seconds per page, look, animation level, CRT strength, crawl text and speed, clock format, jazz volume, and the PDA jazz mode.
+- **TalonCast:** units, pages, seconds per page, look, animation level, CRT strength, crawl text and speed, clock format, jazz volume, and the PDA jazz mode.
 - **Files & backups:** backups to keep, auto-export, watch folder, and start over.
 - **Appearance & startup:**
   - Themes: Aerie, Classic Desktop, Owl Night, Gryphon Gold, Daylight.
