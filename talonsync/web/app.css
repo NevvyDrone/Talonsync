@@ -483,3 +483,9 @@ html.compact .set { padding: 8px 0; }
 #ed-name { width: 110px; text-transform: uppercase; font-family: "DejaVu Sans Mono", Consolas, monospace; }
 #ed-src { min-height: 330px; resize: vertical; font-family: "DejaVu Sans Mono", Consolas, "Cascadia Mono", monospace; font-size: 14px; line-height: 1.5;
   background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 12px 14px; tab-size: 2; }
+
+/* 1.15 live backup: the restore offer */
+.mirror-offer { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; display: flex; gap: 10px; align-items: center;
+  max-width: min(720px, calc(100vw - 32px)); padding: 12px 14px; border-radius: 14px; background: var(--panel, #10261d); color: var(--ink, #e8fff4);
+  border: 1px solid var(--aur-a, #7dc79a); box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+.mirror-offer .grow { flex: 1; font-size: 13.5px; line-height: 1.4; }

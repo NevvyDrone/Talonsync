@@ -175,6 +175,8 @@ class _Handler(BaseHTTPRequestHandler):
             return self._json([asdict(r) for r in app.syncer.reports])
         if route == "backups":
             return self._json(app.backups())
+        if route == "mirror":
+            return self._json({**app.mirror.state(), "snapshots": app.mirror.snapshots()})
         if route == "doctor":
             return self._json(app.doctor())
         if route == "support":
@@ -333,6 +335,13 @@ class _Handler(BaseHTTPRequestHandler):
             return self._json({"folder": folder, "files": [os.path.basename(f) for f in files]})
         if route == "backups/create":
             return self._json({"name": app.backup(b.get("label", ""))})
+        if route == "mirror/restore":
+            return self._json({"message": app.mirror.restore(b.get("snapshot", ""))})
+        if route == "mirror/dismiss":
+            app.mirror.dismiss()
+            return self._json({"ok": True})
+        if route == "mirror/snapshot":
+            return self._json({"name": app.mirror.snapshot("manual")})
         if route == "backups/restore":
             app.restore(b.get("name", ""))
             return self._json({"ok": True})

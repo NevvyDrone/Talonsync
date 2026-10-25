@@ -55,6 +55,10 @@ class TalonSyncApp:
         self._stop = threading.Event()
         self._watch_seen: Dict[str, float] = {}
         self.started = time.time()
+        from .mirror import PdaMirror                   # 1.15: live backup of the PDA's saved memory
+        self.mirror = PdaMirror(self.dir, self.settings, self.log, lambda: self.link,
+                                lambda: bool(self.syncer and self.syncer.busy),
+                                lambda: self.oscq.vrchat_values() if self.oscq else {})
 
     # ------------------------------------------------------------ logging
     def log(self, msg: str, level: str = "info"):
@@ -150,6 +154,10 @@ class TalonSyncApp:
 
     # ------------------------------------------------------------ OSC events
     def _on_osc(self, addr: str, args):
+        try:
+            self.mirror.on_osc(addr, args)
+        except Exception as e:
+            self.log(f"live backup: {e}")
         if self.pc.on_osc(addr, args):
             return
         if addr == "/avatar/parameters/" + pr.SYNC_REQ:
@@ -579,6 +587,7 @@ class TalonSyncApp:
         last_save_rev = self.db.revision
         while not self._stop.wait(2.0):
             try:
+                self.mirror.tick()
                 # autosave edits
                 if self.db.revision != last_save_rev and not (self.syncer and self.syncer.busy):
                     self.db.save()
@@ -636,6 +645,7 @@ class TalonSyncApp:
                        "pda_info": self.db.device.pda_info},
             "demo_screen": self.demo.screen if self.demo else "",
             "pclink": self.pc.state(),
+            "mirror": self.mirror.state(),
             "revision": self.db.revision,
             "log": list(self.log_lines)[-60:],
         }

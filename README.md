@@ -4,12 +4,15 @@ Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 
 TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonCast, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a small windowed OS that runs on your PC and shows on the PDA in VRChat.
 
-![TalonOS Enhanced on the Talon Pilot PDA: start-up screen, desktop, Start menu, Tic-Tac-Talon, and in the Skyglass look Calculator, Control Panel, Featherword and Notepad](docs/screenshots/talonos_enhanced.png)
+![TalonOS Enhanced on the Talon Pilot PDA. Top row: the start-up screen, then the brushed-aluminium Classic look: desktop, Start menu and Tic-Tac-Talon. Bottom row: Calculator, Control Panel and Featherword in the mint Skyglass look, and My Files in Classic](docs/screenshots/talonos_enhanced.png)
 
 ## What's inside
 
 - **TalonSync:** two-way sync of your PDA's calendar, contacts, tasks, memos and settings with your PC, plus backups and
   imports and exports in everyday formats (vCard, iCalendar, CSV, Markdown).
+- **Live backup** *(1.15)*: TalonSync keeps a copy of everything your PDA remembers the moment it changes. Switching
+  worlds never loses anything, and if your PDA ever comes up empty, one tap ("Put it all back") restores it. Snapshots
+  of the last few versions are kept too.
 - **TalonOS Enhanced** *(experimental)*: a small windowed OS drawn on the PDA's screen, in a **Classic** brushed-aluminium look or
   **Skyglass**, mint glass in NevvyDrone's owl colours. Windows, a taskbar, a Start menu and **Control Panel**, **Notepad**, **Calculator**, **My Files**
   with a **Recycle Bin**, **Date/Time** and **System Monitor**. Tap it with your finger or stylus in VRChat, or use the
@@ -26,9 +29,22 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
 - **Now Playing, PC Link, Desktop click:** the song from your PC, PC stats and messages on the PDA, and a click-to-tap
   mode for VRChat desktop players.
 
-| Today | TalonCast | Experimental features |
-|---|---|---|
-| ![TalonSync's Today page](docs/screenshots/pc_today.png) | ![TalonCast in TalonSync](docs/screenshots/pc_talonstar.png) | ![The Experimental settings tab](docs/screenshots/pc_experimental.png) |
+| Today | TalonCast |
+|---|---|
+| ![TalonSync's Today page](docs/screenshots/pc_today.png) | ![TalonCast in TalonSync](docs/screenshots/pc_talonstar.png) |
+| **Live backup** *(1.15)* | **Experimental: TalonOS Enhanced and BASIC** |
+| ![Live backup: the PDA came up empty after a world switch, and TalonSync offers to put it all back](docs/screenshots/pc_live_backup.png) | ![The Experimental page: TalonOS Enhanced's Classic desktop and the BASIC editor](docs/screenshots/pc_experimental.png) |
+
+### New in Talon Pilot 2.24 "Launch Ready"
+
+![The What's new card in the Mint and Owl Night themes, and the safe screen that replaces a magenta screen](docs/screenshots/talon_pilot_224.png)
+
+- **What's new card** the first time you switch on after an update.
+- **Check my install** in the Install Wizard builds every screen program with Unity's own compiler and explains
+  anything wrong; if the screen can't compile, the **safe screen** (right) shows instead of magenta, in the editor and
+  on upload.
+- **Calm by default:** only 3D depth is on; Holo foil, glints, ripples, idle glow and motes wait in Prefs › Effects.
+- **Faster shader compiles,** and TalonSync's **live backup** keeps your PDA safe across world switches.
 
 ## Need help?
 
@@ -53,6 +69,25 @@ package) is sold separately under its own licence.
   else to install.
 - **Build it yourself:** everything needed to compile your own copy is here, and the source is on GitHub:
   [github.com/NevvyDrone/Talonsync](https://github.com/NevvyDrone/Talonsync). The steps are below.
+
+### "Windows protected your PC"
+
+TalonSync.exe isn't signed with a paid certificate, so Windows SmartScreen may warn you the first time. Click
+**More info**, then **Run anyway**. Some antivirus programs also flag apps packaged from Python by mistake; if yours
+quarantines TalonSync.exe, restore it and allow it, or run `Run TalonSync (without building).bat`, which runs the same
+code straight from the readable source in this folder.
+
+### Privacy
+
+TalonSync runs on your PC and talks to VRChat over OSC on your own machine. Your tasks, memos, contacts, calendar and
+the live backup stay in TalonSync's data folder. It only goes online for the TalonCast weather (Open-Meteo, no account)
+and for features you switch on yourself (like Twitch messages or the optional Python plugins). No analytics, no
+accounts, nothing sent to NevvyDrone.
+
+### VRCFury and Modular Avatar
+
+Talon Pilot installs with its own Install Wizard and works alongside VRCFury (tested on NevvyDrone's own
+avatars). TalonSync doesn't care how the PDA was installed: it only needs VRChat's OSC switched on.
 
 ## Build the exe yourself (optional)
 
@@ -150,6 +185,9 @@ Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
   The conduits are settings, tasks, memos, calendar, contacts and the Hypno caption. Change them in Settings › TalonSync.
 - **Conflicts.** For things changed on both sides you can keep the PC version, keep the PDA version, or keep both.
 - **Backups.** A dated backup is saved after every TalonSync (Import & Export › Backups).
+- **Live backup (1.15).** Between syncs, TalonSync keeps a live copy of everything the PDA remembers (typed lines,
+  ticks, settings, the Hoot Pet, best scores) and offers to put it back if the PDA comes up empty after a world or
+  avatar switch. Switch on **Put a wiped PDA back automatically** in Settings › Files & backups to skip the question.
 
 ## Files other apps open
 
@@ -167,7 +205,7 @@ Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 
 ## TalonOS Enhanced and the Terminal (Talon Pilot 2.18+, desktop 2.19+, Skyglass 2.20+)
 
-![About box, Tic-Tac-Talon, line graphics and the text-mode library](docs/screenshots/terminal_and_basic.png)
+![The About box in the Classic and Skyglass looks, then Talon Enhanced BASIC: Tic-Tac-Talon, line graphics and the program library](docs/screenshots/terminal_and_basic.png)
 
 TalonOS Enhanced runs inside TalonSync; the PDA is its screen, touchscreen and buttons. TalonSync sends the screen as
 30 x 8 cells over OSC (a character and a style each), and the PDA's shader draws the title bars, bevels, icons and
@@ -227,7 +265,7 @@ the `Programs` folder inside TalonSync's data folder, and the program you're wor
 - **TalonSync:** auto-sync timer, sync on start, conflict rule, conduits, and the chirp.
 - **Now Playing:** source, playback bar, swap lines, ALL CAPS, hide when paused, and the chatbox format.
 - **TalonCast:** units, pages, seconds per page, look, animation level, CRT strength, crawl text and speed, clock format, jazz volume, and the PDA jazz mode.
-- **Files & backups:** backups to keep, auto-export, watch folder, and start over.
+- **Files & backups:** backups to keep, live backup and automatic restore, auto-export, watch folder, and start over.
 - **Appearance & startup:**
   - Themes: Mint Owl (the default, in NevvyDrone's colours since 1.14.2), Aerie, Classic Desktop, Owl Night, Gryphon Gold, Daylight.
   - Accent color, compact lists, and animations.

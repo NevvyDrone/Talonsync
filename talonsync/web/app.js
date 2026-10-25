@@ -97,6 +97,7 @@ async function poll() {
     S.state = st;
     paintStatus(st);
     paintSync(st);
+    paintMirrorOffer(st);
     if (st.revision !== S.rev) {
       const first = S.rev === -1; S.rev = st.revision; S.cache = {};
       if (!first && !S.dirty && ["today", "calendar", "contacts", "tasks", "memos", "pet", "nowplaying"].includes(S.view)) refreshView();
@@ -106,6 +107,18 @@ async function poll() {
     if (S.view === "pclink") paintPcLive(st);
   } catch (e) { paintStatus(null); }
   setTimeout(poll, S.state && S.state.sync && S.state.sync.running ? 250 : 700);
+}
+// 1.15 live backup: a PDA that loaded wiped gets a one-tap restore offer, wherever you are in TalonSync
+function paintMirrorOffer(st) {
+  const o = st.mirror && st.mirror.offer;
+  let bar = $("#mirror-offer");
+  if (!o) { if (bar) bar.remove(); return; }
+  if (bar) return;
+  bar = h(`<div id="mirror-offer" class="mirror-offer"><div class="grow"><b>Your PDA came up empty.</b> TalonSync has a live copy with ${o.cells_saved} typed characters, your ticks, settings and Hoot Pet.</div>
+    <button class="btn primary" id="mo-restore">Put it all back</button><button class="btn ghost" id="mo-later">Not now</button></div>`);
+  document.body.append(bar);
+  $("#mo-restore").onclick = async () => { const r = await safely(() => api("mirror/restore", {})); if (r) toast(r.message); bar.remove(); };
+  $("#mo-later").onclick = async () => { await api("mirror/dismiss", {}); bar.remove(); };
 }
 function refreshView() { const keep = $("#view").scrollTop; render(); $("#view").scrollTop = keep; }
 
@@ -838,6 +851,7 @@ async function importFiles(fileList, target = "auto") {
 }
 R.files = async (el) => {
   const backups = await api("backups");
+  const mirror = await api("mirror");
   el.append(h(`<div class="grid">
     <div class="panel"><h2>Import</h2>
       <div class="drop" id="drop"><p><b>Drop files here</b> or <label class="btn" style="display:inline-flex">choose files<input type="file" multiple hidden id="imp"></label></p>
@@ -845,6 +859,10 @@ R.files = async (el) => {
       <label class="field" style="max-width:280px;margin:10px auto 0">CSV holds<select id="imp-target"><option value="auto">Work it out</option><option value="contacts">Contacts</option><option value="events">Calendar</option><option value="tasks">Tasks</option><option value="memos">Memos</option></select></label></div></div>
     <div class="panel"><h2>Export</h2><div class="exports">${EXPORT_LIST.map(([k, t, s]) => `<button class="exp" data-x="${k}"><b>${t}</b><span>${s}</span></button>`).join("")}</div>
       <div class="editor-foot"><button class="btn primary" id="exp-all">Export everything to a folder</button><span class="small faint" id="exp-where"></span></div></div>
+    <div class="panel"><h2>Live backup of your PDA</h2>
+      <p class="small muted">${mirror.enabled ? `TalonSync keeps a copy of everything your PDA remembers the moment it changes, so switching worlds or a wiped PDA never loses anything. ${mirror.avatar ? `This avatar: ${mirror.values} values, ${mirror.cells} typed characters${mirror.saved ? ", saved " + ago(mirror.saved) : ""}.` : "Put on your Talon Pilot avatar to start."}` : "Live backup is off (Settings › Files & backups)."}</p>
+      <div class="editor-foot" style="margin:0 0 10px"><button class="btn" id="mb-restore" ${mirror.avatar ? "" : "disabled"}>Put the live copy back on the PDA</button><button class="btn ghost" id="mb-snap" ${mirror.avatar ? "" : "disabled"}>Snapshot now</button></div>
+      ${(mirror.snapshots || []).map((m) => `<div class="item"><div class="grow"><div class="t">${esc(m.name.replace(/\.json$/, ""))}</div><div class="s">${m.cells} typed characters · ${m.count} values</div></div><button class="btn" data-msnap="${esc(m.name)}">Restore</button></div>`).join("")}</div>
     <div class="panel"><h2>Backups</h2><p class="small muted">A backup is saved after every TalonSync and before imports and restores.</p>
       <div class="editor-foot" style="margin:0 0 10px"><button class="btn" id="bk-new">Back up now</button><button class="btn ghost" id="bk-open">Open backups folder</button></div>
       ${backups.length ? backups.map((b) => `<div class="item"><div class="grow"><div class="t">${esc(b.name.replace(/^TalonSync |\.json$/g, ""))}</div><div class="s">${Math.round(b.size / 1024)} KB</div></div><button class="btn" data-restore="${esc(b.name)}">Restore</button></div>`).join("") : '<div class="empty">No backups yet.</div>'}</div>
@@ -858,6 +876,12 @@ R.files = async (el) => {
   $("#exp-all").onclick = async () => { const r = await safely(() => api("export_all", { folder: S.settings.auto_export_folder || "" })); if (r) { $("#exp-where").textContent = `${r.files.length} files in ${r.folder}`; api("open_folder", { path: r.folder }); } };
   $("#bk-new").onclick = () => safely(() => api("backups/create", { label: "manual" }), "Backed up").then(refreshView);
   $("#bk-open").onclick = () => api("open_folder", { path: S.meta.data_dir + "/Backups" });
+  const mr = $("#mb-restore"); if (mr) mr.onclick = async () => { if (!confirm("Write the live copy back to your PDA? It takes a few seconds.")) return; const r = await safely(() => api("mirror/restore", {})); if (r) toast(r.message); };
+  const ms = $("#mb-snap"); if (ms) ms.onclick = () => safely(() => api("mirror/snapshot", {}), "Snapshot saved").then(refreshView);
+  $$("[data-msnap]", el).forEach((b) => (b.onclick = async () => {
+    if (!confirm(`Write snapshot ${b.dataset.msnap} back to your PDA?`)) return;
+    const r = await safely(() => api("mirror/restore", { snapshot: b.dataset.msnap })); if (r) toast(r.message);
+  }));
   $$("[data-restore]", el).forEach((b) => (b.onclick = async () => {
     if (!confirm(`Restore ${b.dataset.restore}? Your current data is backed up first.`)) return;
     await safely(() => api("backups/restore", { name: b.dataset.restore }), "Restored. Good as new!"); S.cache = {};
@@ -1069,6 +1093,8 @@ const SETTINGS_TABS = {
     ["__doctor"], ["__support"],
   ],
   "Files & backups": [
+    ["live_backup", "Live backup of the PDA", "switch", null, "Keeps a copy of everything your PDA remembers as it changes (over OSC, on this PC only)."],
+    ["auto_restore", "Put a wiped PDA back automatically", "switch", null, "Off: TalonSync asks first."],
     ["backup_on_sync", "Back up after every TalonSync", "switch"], ["backup_keep", "Backups to keep", "number"],
     ["auto_export", "Export files after every TalonSync", "switch"], ["auto_export_folder", "Export folder", "text"],
     ["watch_import_folder", "Import anything dropped in this folder", "text", null, "Files are renamed .imported afterwards."],

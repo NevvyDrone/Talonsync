@@ -36,6 +36,8 @@ DEFAULTS = {
     "sound": True,
     "chirp_on_done": True,
     # ---- backups and files
+    "live_backup": True,              # 1.15: keep a live copy of the PDA's saved memory as VRChat reports it over OSC
+    "auto_restore": False,            # 1.15: a PDA that loads wiped gets its copy back without asking
     "backup_keep": 20,
     "backup_on_sync": True,
     "auto_export": False,
