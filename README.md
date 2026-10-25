@@ -63,6 +63,9 @@ The names Talon Pilot, TalonOS, TalonSync, TalonCast, Hoot-agotchi and Owl Oracl
 NevvyDrone; the licence doesn't cover them, so please give forks their own name. Talon Pilot itself (the Unity avatar
 package) is sold separately under its own licence.
 
+TalonSync.exe also contains open-source libraries by other people (the window, tray icon, OSCQuery and more), each
+under its own licence: see [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt).
+
 ## Get TalonSync
 
 - **Ready to run (Windows):** the Talon Pilot download includes a prebuilt **`TalonSync.exe`**. Double-click it; nothing
