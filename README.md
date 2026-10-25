@@ -2,19 +2,21 @@
 
 Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 
-TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonStar 4000, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a classic desktop that runs on your PC and shows on the PDA in VRChat.
+TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA with your PC over OSC and plays the TalonSync animation on the PDA in game. It also includes TalonStar 4000, a cable-weather channel with a smooth jazz loop, and it can be the CPU for the PDA's Terminal: **TalonOS Enhanced**, a small windowed OS that runs on your PC and shows on the PDA in VRChat.
 
-![TalonOS Enhanced on the Talon Pilot PDA: start-up screen, desktop, Start menu and Program Library](docs/screenshots/talonos_enhanced.png)
+![TalonOS Enhanced on the Talon Pilot PDA: start-up screen, desktop, Start menu, Tic-Tac-Talon, and in the Skyglass look Calculator, Control Panel, Featherword and Notepad](docs/screenshots/talonos_enhanced.png)
 
 ## What's inside
 
 - **TalonSync:** two-way sync of your PDA's calendar, contacts, tasks, memos and settings with your PC, plus backups and
   imports and exports in everyday formats (vCard, iCalendar, CSV, Markdown).
-- **TalonOS Enhanced** *(experimental)*: a grey-bevel desktop with icons, a Start menu, a taskbar clock and windows,
-  drawn on the PDA's screen. Tap it with your finger or stylus in VRChat, or use the PDA's buttons.
-- **Program Library:** 16 ready-made programs you can run without knowing BASIC: Guess My Number, Rock Paper Talon,
-  Feather Pile, Moon Lander, Tic-Tac-Talon, Featherword, Aerie Keeper, Talon Dice, Find the Mouse, Ponder the Owl,
-  Learn BASIC, Math Drill and four demos.
+- **TalonOS Enhanced** *(experimental)*: a small windowed OS drawn on the PDA's screen, in a **Classic** grey look or
+  glossy **Skyglass**. Windows, a taskbar, a Start menu and **Control Panel**, **Notepad**, **Calculator**, **My Files**
+  with a **Recycle Bin**, **Date/Time** and **System Monitor**. Tap it with your finger or stylus in VRChat, or use the
+  PDA's buttons.
+- **Games:** Guess My Number, Rock Paper Talon, Feather Pile, Moon Lander, Tic-Tac-Talon, Featherword, Aerie Keeper,
+  Talon Dice, Find the Mouse, Ponder the Owl and Math Drill, as windowed apps you play by tapping (best scores kept).
+- **BASIC Programs:** the same games written in BASIC, plus Learn BASIC and four demos, to run, read and change.
 - **Talon Enhanced BASIC:** a line-numbered home-computer BASIC with line graphics (`BOX`, `LINE`, `LOCATE`), saved
   programs and a local terminal with its own commands.
 - **TalonStar 4000:** a retro cable-weather channel (free weather from Open-Meteo, no account) with smooth jazz, on your
@@ -161,14 +163,22 @@ Created by NevvyDrone · [nevvydrone.com](https://nevvydrone.com)
 - **Automatic exports:** set an export folder and TalonSync writes every format after each TalonSync.
 - **Watch folder:** set a watch folder and TalonSync imports anything you drop into it.
 
-## TalonOS Enhanced and the Terminal (Talon Pilot 2.18+, desktop 2.19+)
+## TalonOS Enhanced and the Terminal (Talon Pilot 2.18+, desktop 2.19+, Skyglass 2.20+)
 
 ![About box, Tic-Tac-Talon, line graphics and the text-mode library](docs/screenshots/terminal_and_basic.png)
 
 TalonOS Enhanced runs inside TalonSync; the PDA is its screen, touchscreen and buttons. TalonSync sends the screen as
 30 x 8 cells over OSC (a character and a style each), and the PDA's shader draws the title bars, bevels, icons and
 taskbar from them, so it adds no animator layers and nothing runs per frame. Taps come back from the PDA's touch grid
-over OSC. On the desktop: tap anything, or Up/Down to choose, Center to open, Left to go back, Right for the Start menu.
+over OSC. On the desktop: tap anything, or Up/Down to move between controls, Center to press, Left to go back or close,
+Right for the Start menu. Typed lines go into the box with the cursor; on the desktop, typing a program's name opens it.
+
+The Start menu has Programs (BASIC Programs, BASIC, Terminal, My Files), Accessories (Notepad, Calculator, Date/Time,
+System Monitor), Games, Documents, Settings (Control Panel), Help and Shut Down. Control Panel switches between the
+**Classic** and **Skyglass** looks (Skyglass needs Talon Pilot 2.20), sets the clock, beeps and the start-up screen,
+and chooses whether the desktop comes back when the PDA switches on. Settings and best scores are saved in
+`talonos.json` in TalonSync's data folder, Notepad's notes in `Documents`, and deleted files go to `Recycled` until you
+empty the Recycle Bin.
 
 
 **Experimental, opt in:** open **Experimental** in the sidebar and switch on **Terminal CPU** first (it's off by default).

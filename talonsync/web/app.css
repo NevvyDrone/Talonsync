@@ -419,6 +419,32 @@ html.compact .set { padding: 8px 0; }
 .tc.f3.bb, .tc.f4.bb, .tc.f6.bb { border-bottom: 2px solid #fff; }
 .tc.f3.br, .tc.f4.br, .tc.f6.br { border-right: 2px solid #fff; }
 .tc.f7.bt { border-top: 1px solid #000; } .tc.f7.bb { border-bottom: 1px solid #000; } .tc.f7.bl { border-left: 1px solid #000; } .tc.f7.br { border-right: 1px solid #000; }
+/* TalonSync 1.13: buttons sit inside their row (a margin above and below), so stacked buttons stay apart */
+.term.gui .tc.f2, .term.gui .tc.f3 { border-top: 5px solid var(--tface, #c0c0c0) !important; border-bottom: 5px solid var(--tface, #c0c0c0) !important;
+  border-left: 0 !important; border-right: 0 !important; --hi: #fff; --lo: #404040; box-shadow: inset 0 2px var(--hi), inset 0 -2px var(--lo); }
+.term.gui .tc.f3 { --hi: #808080; --lo: #fff; }
+.term.gui .tc.f2.bl, .term.gui .tc.f3.bl { box-shadow: inset 0 2px var(--hi), inset 0 -2px var(--lo), inset 2px 0 var(--hi); }
+.term.gui .tc.f2.br, .term.gui .tc.f3.br { box-shadow: inset 0 2px var(--hi), inset 0 -2px var(--lo), inset -2px 0 var(--lo); }
+.term.gui .tc.f2.bl.br, .term.gui .tc.f3.bl.br { box-shadow: inset 0 2px var(--hi), inset 0 -2px var(--lo), inset 2px 0 var(--hi), inset -2px 0 var(--lo); }
+.term.gui .trow:last-child .tc.f2, .term.gui .trow:last-child .tc.f3 { border-top-color: #c0c0c0 !important; border-bottom-color: #c0c0c0 !important; }
+/* Skyglass: a glossy sky-and-glass look */
+.term.gui.sky { --tface: #ecead8; background: linear-gradient(#2e78e6 0%, #9ed8ff 78%, #5fbf3f 82%, #2f8c26 100%); }
+.term.gui.sky .tc.s1 { background: transparent; text-shadow: 1px 1px 1px #01224a; }
+.term.gui.sky .tc.s2, .term.gui.sky .tc.s11, .term.gui.sky .tc.s14, .term.gui.sky .tc.s25, .term.gui.sky .tc.s26 { background: #ecead8; }
+.term.gui.sky .tc.s6, .term.gui.sky .tc.s7, .term.gui.sky .tc.s15 { background: linear-gradient(#fff, #dcdcd2); }
+.term.gui.sky .tc.s3, .term.gui.sky .tc.s27 { background: linear-gradient(#5a96f5 0%, #1c62e8 45%, #0a3fb8 100%); }
+.term.gui.sky .tc.s4 { background: linear-gradient(#a6bff0, #7d97d0); color: #e8eefc; }
+.term.gui.sky .tc.s5, .term.gui.sky .tc.s19, .term.gui.sky .tc.s22 { background: #1c5fd8; }
+.term.gui.sky .tc.s18 { background: linear-gradient(#1c62e8, #3fa0ff); }
+.term.gui.sky .tc.s9 { background: linear-gradient(#5b8ff5, #1f55d8 50%, #1745b8); color: #fff; }
+.term.gui.sky .tc.s10 { background: linear-gradient(#5cc04a, #2e9a2a 50%, #1f7a1c); color: #fff; font-weight: 700; }
+.term.gui.sky .tc.s16 { background: linear-gradient(#2ea2ff, #0c74e0); color: #fff; }
+.term.gui.sky .tc.s23 { background: linear-gradient(90deg, #3fc046 70%, #fff 70%); }
+.term.gui.sky .tc.f1 { border-color: #0a46c8 !important; }
+.term.gui.sky .tc.f4 { border-color: #7f9cc8 !important; }
+.term.gui.sky .tc.f2, .term.gui.sky .tc.f3 { --hi: #3a5f9a; --lo: #3a5f9a; }
+.term.gui.sky .trow:last-child .tc.f2, .term.gui.sky .trow:last-child .tc.f3 { border-top-color: #2a62e0 !important; border-bottom-color: #1a4cc4 !important; }
+.term.gui.sky .tc.f5, .term.gui.sky .tc.f8, .term.gui.sky .tc.f6 { border: 0 !important; }
 .term-pad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 44px); gap: 6px; align-content: start; }
 .term-pad .btn { justify-content: center; padding: 0; }
 .term-pad svg { width: 18px; height: 18px; }

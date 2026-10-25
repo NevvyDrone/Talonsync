@@ -52,8 +52,8 @@ try:
     code, t = call("terminal/start", {"what": "gui"}); assert t["gui"] is True
     assert wait(lambda: not call("terminal")[1]["splash"], 6)
     t = call("terminal")[1]; assert "Start" in t["rows"][7] and t["styles"][7][0] in (9, 10, 7), (t["mode"], t["rows"][7], t["styles"][7][:4])
-    call("terminal/tap", {"row": 0, "col": 4}); assert app.terminal.gui.window == "library"
-    call("terminal/key", {"key": "down"}); assert app.terminal.gui.lib_sel == 1
+    call("terminal/tap", {"row": 4, "col": 13}); assert app.terminal.gui.window == "library"
+    call("terminal/key", {"key": "down"}); assert app.terminal.gui.top.list.sel == 1
     call("terminal/key", {"key": "left"}); assert app.terminal.gui.window is None
     call("terminal/key", {"key": "right"}); assert app.terminal.gui.menu_open
     code, r = call("program/delete", {"name": "HITHERE"}); assert "HITHERE" not in call("programs")[1]["files"]

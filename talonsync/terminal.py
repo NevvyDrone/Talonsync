@@ -283,7 +283,7 @@ class Terminal:
             self.basic.stop_flag.set()
             if self.waiting_input:
                 self.inputs.put(None)
-            if self.return_gui:                            # 1.12.1: you were using TalonOS Enhanced: it comes back
+            if self.return_gui and self.gui.cfg.get("resume", True):   # 1.12.1: you were on TalonOS Enhanced: it comes back
                 self.start_gui()                           # (Shut Down or MENU from the desktop goes back to the menu)
             else:
                 self.menu()
@@ -468,6 +468,38 @@ class Terminal:
         self.redraw(force=True)
         self.dirty.set()
 
+    def open_program(self, name: str, run: bool = False):
+        """From My Files: put a saved program into BASIC (full screen) and LIST or RUN it; Left comes back."""
+        name = self.program_name(name)
+        source = self.program_read(name)
+        if self.worker and self.worker.is_alive():
+            return
+        self._keep_old()
+        self.return_gui = True
+        self.mode = "basic"
+        self.cls()
+        self._load_into(self.basic, source)
+        self._autosave()
+        self.write(f"LOADED {name}\n")
+        if run:
+            self.worker = threading.Thread(target=self._run, args=("RUN",), daemon=True, name="basic")
+            self.worker.start()
+        else:
+            self.write("TYPE RUN OR LIST. LEFT = BACK\nREADY.\n")
+        self.dirty.set()
+
+    def _keep_old(self):
+        """The program in BASIC is kept as OLDPROG before another one replaces it."""
+        b = self.basic
+        if b.program:
+            try:
+                os.makedirs(b.folder, exist_ok=True)
+                with open(os.path.join(b.folder, "OLDPROG.bas"), "w", encoding="utf-8") as f:
+                    for n in b.lines():
+                        f.write(f"{n} {b.program[n]}\n")
+            except Exception:
+                pass
+
     def back_to_gui(self):
         self.mode = "gui"
         self.return_gui = True
@@ -516,17 +548,17 @@ class Terminal:
             self._touch_timer = threading.Timer(0.09, self._tap_now)   # let the row and the column both arrive
             self._touch_timer.start()
 
-    def touch_cell(self):
+    def touch_cell(self, exact: bool = False):
         if not self.touch_rows or not self.touch_cols:
             return None
         y = 40.0 + 12.5 * (sum(self.touch_rows) / len(self.touch_rows) + 0.5)
         x = 8.0 + (304.0 / INK_COLS) * (sum(self.touch_cols) / len(self.touch_cols) + 0.5)
         r = int(min(ROWS - 1, max(0, (y - GUI_Y0) // GUI_RH)))
         c = int(min(COLS - 1, max(0, (x - GUI_X0) // GUI_CW)))
-        return r, c
+        return (r, c, (x - GUI_X0) / GUI_CW) if exact else (r, c)
 
     def _tap_now(self):
-        rc = self.touch_cell()
+        rc = self.touch_cell(exact=True)
         if rc and self.mode == "gui":
             self.gui.tap(*rc)
             self.dirty.set()
@@ -548,6 +580,7 @@ class Terminal:
             styles = [[0] * COLS for _ in vis]
             cur = float(self.cursor())
         return {"enabled": self.enabled(), "mode": self.mode, "gui": gui, "splash": gui and cur >= 2000, "cursor": cur,
+                "theme": self.gui.cfg.get("theme", "classic"),
                 "rows": text, "styles": styles, "running": bool(self.worker and self.worker.is_alive()),
                 "waiting_input": self.waiting_input, "program_lines": len(self.basic.program)}
 
@@ -603,14 +636,7 @@ class Terminal:
                 test.enter(l)
             except BasicError as e:
                 raise ValueError(f"?{e} ERROR in: {l[:40]}")
-        if b.program:
-            try:
-                os.makedirs(b.folder, exist_ok=True)
-                with open(os.path.join(b.folder, "OLDPROG.bas"), "w", encoding="utf-8") as f:
-                    for n in b.lines():
-                        f.write(f"{n} {b.program[n]}\n")
-            except Exception:
-                pass
+        self._keep_old()
         self.return_gui = self.return_gui and self.mode == "gui"
         self.mode = "basic"
         self.cls()

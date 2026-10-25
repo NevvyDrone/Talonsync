@@ -867,11 +867,15 @@ R.files = async (el) => {
 // ---------------------------------------------------------------- Experimental: Terminal CPU, TalonOS Enhanced, BASIC
 // The same CPU the PDA's Terminal uses: its screen, its buttons, taps on the TalonOS Enhanced desktop, and a BASIC editor.
 const TERM_FAM = { 2: 1, 3: 1, 4: 1, 11: 1, 14: 1, 18: 1, 19: 1, 25: 1, 27: 1, 6: 2, 15: 2, 7: 3, 8: 4, 5: 4, 23: 4, 9: 5, 16: 6, 12: 7, 10: 8 };
-const TERM_ICON = { f: "📁", p: "🖥️", r: "🗑️", o: "🦉", A: "📅", B: "👤", C: "☑️", D: "📄", E: "🧮", F: "🕒", G: "⚙️", H: "🔄", P: "🦉" };
+const TERM_ICON = { f: "📁", p: "🖥️", r: "🗑️", o: "🦉", A: "📅", B: "👤", C: "☑️", D: "📄", E: "🧮", F: "🕒", G: "⚙️", H: "🔄",
+  I: "✏️", J: "💲", K: "💾", L: "🔒", M: "🎲", P: "🦉" };
+// like the PDA: a window only frames toward the outside, never toward the controls inside it
+const termEdge = (f, n) => n !== f && !(f === 1 && ((n >= 2 && n <= 4) || n === 7));
 function termPaint(box, t) {
   const R8 = t.rows || [], ST = t.styles || [];
   const cur = t.cursor, cr = cur >= 0 && cur < 1000 ? Math.floor(cur / 32) : -1, cc = cur >= 0 && cur < 1000 ? cur % 32 : -1;
   box.classList.toggle("gui", !!t.gui); box.classList.toggle("splash", !!t.splash); box.classList.toggle("nocpu", !t.enabled);
+  box.classList.toggle("sky", t.theme === "skyglass");
   if (!t.enabled) { box.innerHTML = '<div class="term-msg">No CPU: switch on the Terminal CPU above.</div>'; return; }
   if (t.splash) { box.innerHTML = '<div class="term-msg splash">🦉<br>TalonOS Enhanced<br><small>Starting up...</small></div>'; return; }
   const fam = (r, c) => { if (r < 0 || r > 7 || c < 0 || c > 29) return -1; const s = ST[r][c]; return TERM_FAM[s] || 0; };
@@ -886,10 +890,10 @@ function termPaint(box, t) {
       if (t.gui) {
         const f = TERM_FAM[st] || 0;
         if (f) {
-          if (fam(r - 1, c) !== f && fam(r - 1, c) !== -1) cls += " bt";
-          if (fam(r + 1, c) !== f && fam(r + 1, c) !== -1) cls += " bb";
-          if (fam(r, c - 1) !== f) cls += " bl";
-          if (fam(r, c + 1) !== f) cls += " br";
+          if (fam(r - 1, c) !== -1 && termEdge(f, fam(r - 1, c))) cls += " bt";
+          if (fam(r + 1, c) !== -1 && termEdge(f, fam(r + 1, c))) cls += " bb";
+          if (termEdge(f, fam(r, c - 1))) cls += " bl";
+          if (termEdge(f, fam(r, c + 1))) cls += " br";
           cls += " f" + f;
         }
         if (st === 20 || st === 21 || st === 28 || st === 29) { cls += " ic"; ch = TERM_ICON[ch] || "▪"; }
@@ -906,7 +910,7 @@ R.experimental = (el) => {
   el.append(h(`<div class="grid xp-page">
     <div class="panel exp-cpu"><div class="exp-head"><div>
       <h2>${icon("experimental")} Terminal CPU <span class="tag-exp">Experimental</span></h2>
-      <p class="muted small">TalonSync becomes the CPU for your PDA's Terminal app (Talon Pilot 2.18+; the TalonOS Enhanced desktop needs 2.19). Still being tested: it may change or go away in a later version. Off: the Terminal says "No CPU found". Everything below also works without VRChat.</p></div>
+      <p class="muted small">TalonSync becomes the CPU for your PDA's Terminal app (Talon Pilot 2.18+; the TalonOS Enhanced desktop needs 2.19, its Skyglass look 2.20). Still being tested: it may change or go away in a later version. Off: the Terminal says "No CPU found". Everything below also works without VRChat.</p></div>
       <span class="switch"><input type="checkbox" id="exp-on" ${on ? "checked" : ""} aria-label="Terminal CPU"><span></span></span></div></div>
     <div class="panel"><div class="term-top"><h2>Terminal</h2><div class="term-start">
       <button class="btn" data-start="gui">TalonOS Enhanced</button><button class="btn" data-start="basic">BASIC</button>

@@ -57,7 +57,7 @@ for p in library.PROGRAMS:
     t.stop()
 # the library screens themselves
 a = App(); a.link = Link(); a.dir = tempfile.mkdtemp(); a.settings = {"exp_terminal": True}
-t = Terminal(a); t.menu(); print(screen(t)); t.line("1"); time.sleep(1.6); print(screen(t)); t.line("2"); print(screen(t))
+t = Terminal(a); t.menu(); print(screen(t)); t.line("2"); t.line("LIBRARY"); time.sleep(1.6); print(screen(t)); t.line("2"); print(screen(t))
 t.line("L"); t.line(""); t.line("E"); print(screen(t)); t.line("LIBRARY"); time.sleep(1.6); t.line("N"); print(screen(t)); t.line("N"); print(screen(t))
 assert os.path.exists(os.path.join(a.dir, "Programs", "GUESS.bas"))
 for r in t.visible(): assert len(r) <= 30, r
