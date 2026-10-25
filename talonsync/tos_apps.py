@@ -851,7 +851,7 @@ HELP_PAGES = [
     ("Typing", "Type on the PDA keyboard and press Done: the text goes into the box with the cursor."),
     ("Windows", "The _ button hides a window; its taskbar button brings it back. x closes it."),
     ("Programs", "Games and tools are in Start. BASIC and the Terminal run full screen; Left comes back."),
-    ("Settings", "Control Panel changes the theme, the clock and sounds. Skyglass is glossy; Classic is grey."),
+    ("Settings", "Control Panel sets the theme, clock and sounds. Skyglass: mint glass. Classic: brushed metal."),
     ("Shortcuts", "On the desktop type a program's name, like NOTEPAD or CALC. TALONOS comes back here anywhere."),
 ]
 

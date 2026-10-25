@@ -2,7 +2,7 @@
 
 TalonSync is the CPU and draws the screen as 30 x 8 cells, each a character plus a style (see STYLE below and
 Talon_Term.cginc). The PDA turns styles into title bars, bevelled buttons, fields, the taskbar and icons, in the
-Classic or the Skyglass theme.
+Classic (brushed aluminium) or Skyglass (mint glass in the owl colours) theme.
 
 1.13: a real window manager. Apps (tos_apps.py, tos_games.py) draw their window every frame with a tiny
 immediate-mode toolkit (UI below): labels, buttons, fields, check boxes, radio buttons, lists and progress bars.

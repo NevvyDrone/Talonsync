@@ -10,8 +10,8 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
 
 - **TalonSync:** two-way sync of your PDA's calendar, contacts, tasks, memos and settings with your PC, plus backups and
   imports and exports in everyday formats (vCard, iCalendar, CSV, Markdown).
-- **TalonOS Enhanced** *(experimental)*: a small windowed OS drawn on the PDA's screen, in a **Classic** grey look or
-  glossy **Skyglass**. Windows, a taskbar, a Start menu and **Control Panel**, **Notepad**, **Calculator**, **My Files**
+- **TalonOS Enhanced** *(experimental)*: a small windowed OS drawn on the PDA's screen, in a **Classic** brushed-aluminium look or
+  **Skyglass**, mint glass in NevvyDrone's owl colours. Windows, a taskbar, a Start menu and **Control Panel**, **Notepad**, **Calculator**, **My Files**
   with a **Recycle Bin**, **Date/Time** and **System Monitor**. Tap it with your finger or stylus in VRChat, or use the
   PDA's buttons.
 - **Games:** Guess My Number, Rock Paper Talon, Feather Pile, Moon Lander, Tic-Tac-Talon, Featherword, Aerie Keeper,
