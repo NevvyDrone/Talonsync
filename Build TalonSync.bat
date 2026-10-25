@@ -111,6 +111,6 @@ exit /b 1
 :fail
 echo.
 echo   Something went wrong ^(see the messages above^).
-echo   Copy them to Claude and we'll fix it.
+echo   Email them to nevvydrone@nevvydrone.com and we'll fix it.
 pause
 exit /b 1

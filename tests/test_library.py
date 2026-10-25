@@ -53,7 +53,7 @@ for p in library.PROGRAMS:
     if not ok:
         print(screen(t))
     if p["name"] in ("TICTAC", "ART", "TOUR"):
-        open(f"/tmp/claude-0/-home-claude/bb170ebd-2469-5e98-ada8-43fc9924e221/scratchpad/scr_{p['name']}.txt", "w").write(screen(t))
+        open(os.path.join(tempfile.gettempdir(), f"scr_{p['name']}.txt"), "w").write(screen(t))
     t.stop()
 # the library screens themselves
 a = App(); a.link = Link(); a.dir = tempfile.mkdtemp(); a.settings = {"exp_terminal": True}
