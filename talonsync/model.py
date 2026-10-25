@@ -200,7 +200,7 @@ class Device:
     sync_id: str = ""
     hypno_caption: str = ""             # empty = the PDA's built-in "Just relax..."
     prefs: Dict[str, float] = field(default_factory=lambda: {
-        "Hour": 12, "Minute": 0, "Clock24": 0, "Bright": 0.75, "Theme": 1, "Wall": 1, "FX": 0, "Sound": 1, "Vol": 1,
+        "Hour": 12, "Minute": 0, "Clock24": 0, "Bright": 0.75, "Theme": 1, "Wall": 2, "FX": 0, "Sound": 1, "Vol": 1,
         "TapBeep": 1, "GameSnd": 1, "Btn1": 1, "Btn2": 2, "Btn3": 3, "Btn4": 4, "Saver": 1, "SaverTime": 1,
         "AutoOff": 0, "BootLock": 0, "ClockSrc": 0,
         "model3D": 2, "look3D": 2, "spin3D": 1, "hypSpeed": 2, "hypStyle": 0, "scopeMode": 0})

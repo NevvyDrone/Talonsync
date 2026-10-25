@@ -31,7 +31,7 @@ class FakePda:
         self.ink: List[List[bool]] = [[False] * self.ink_cols for _ in range(self.ink_rows)]
         self.values: Dict[str, float] = {v.param: 0.0 for v in pr.VALUES}
         for v in pr.PREFS:
-            self.values[v.param] = {"Hour": 12, "Bright": 0.75, "Theme": 1, "Wall": 1, "Sound": 1, "Vol": 1, "TapBeep": 1,
+            self.values[v.param] = {"Hour": 12, "Bright": 0.75, "Theme": 1, "Wall": 2, "Sound": 1, "Vol": 1, "TapBeep": 1,
                                     "GameSnd": 1, "Btn1": 1, "Btn2": 2, "Btn3": 3, "Btn4": 4, "Saver": 1, "SaverTime": 1}.get(v.key, 0)
         for v, d in zip(pr.APP_SETTINGS, [2, 2, 1, 2, 0, 0]):
             self.values[v.param] = d

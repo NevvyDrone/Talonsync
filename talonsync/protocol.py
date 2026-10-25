@@ -98,7 +98,7 @@ PREFS = [
     _pref("Clock24", "TP/S/Clock24", "int", "Time format", 0, 1, ["12-hour", "24-hour"]),
     _pref("Bright", "TP/Bright", "float", "Brightness", 0.1, 1.0),
     _pref("Theme", "TP/Theme", "int", "Theme", 0, 7, ["Classic LCD", "Mint Owl", "Owl Night", "Feather Gray", "Gryphon Gold", "Custom 1", "Custom 2", "Custom 3"]),
-    _pref("Wall", "TP/S/Wall", "int", "Wallpaper", 0, 1, ["Plain", "Aurora"]),
+    _pref("Wall", "TP/S/Wall", "int", "Wallpaper", 0, 2, ["Plain", "Aurora", "Morning mist"]),
     _pref("FX", "TP/S/FX", "int", "Screen effect", 0, 2, ["None", "LCD grid", "Scanlines"]),
     _pref("Sound", "TP/Sound", "float", "System sound", 0, 1, ["Off", "On"]),
     _pref("Vol", "TP/S/Vol", "int", "Volume", 0, 2, ["Low", "Medium", "High"]),
