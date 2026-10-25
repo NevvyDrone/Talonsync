@@ -75,8 +75,8 @@ g.close(cp); t.line("notepad"); assert g.window == "notepad"
 np = g.top
 t.line("Owls are"); t.line("very wise")
 assert np.lines[:2] == ["Owls are", "very wise"], np.lines
-np.path = os.path.join(a.dir, "Documents", "owls.txt"); np.save()
-assert open(np.path).read() == "Owls are\nvery wise\n"
+np.path = "C:\\Documents\\owls.txt"; np.save()                          # TalonFS paths (1.14)
+assert open(os.path.join(a.dir, "Documents", "owls.txt")).read() == "Owls are\nvery wise\n"
 g.close(np)
 # My Files shows the note and opens it in Notepad
 t.line("files"); fl = g.top; assert any(n == "OWLS.TXT" for n, k, p in fl.items), fl.items

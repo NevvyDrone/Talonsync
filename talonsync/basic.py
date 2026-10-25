@@ -10,6 +10,10 @@ Runs on the PC inside TalonSync; the PDA is its screen and keyboard. Classic hom
   LEFT$ RIGHT$ MID$ STR$ CHR$ UCASE$ LCASE$ TIME$ DATE$ TIMER TAB() SPC()
   Operators: + - * / ^ (or **) MOD, = <> < > <= >=, AND OR NOT. True is -1, false 0.
   "Enhanced": RND(n) with n > 1 gives a whole number 1..n; lines may be split over several 15-letter sends.
+  Files (TalonSync 1.14, in TalonFS): OPEN #1, "C:\\DOCUMENTS\\X.TXT", "O" (I input, O output, A append), PRINT #1, ...,
+  INPUT #1, A$, CLOSE #1, EOF(1). Windows (only when run as a TalonOS app): WINDOW "TITLE", TEXT r,c,S$,
+  BUTTON id,r,c,w,"LABEL", FIELD id,r,c,w[,TEXT$], CHECK id,r,c,"LABEL"[,ON], BAR r,c,w,FRACTION, WAIT E[,SECONDS],
+  FIELD$(id), CHECKED(id), NOTIFY S$, MSGBOX S$. EXISTS(PATH$) is true when a file is there.
 
 Like the old ones, keywords are recognised even without spaces (FORI=1TO10), so variable names must not
 contain keywords. Errors use the classic "?SYNTAX ERROR IN 20" form.
@@ -31,10 +35,12 @@ MEMORY = 32000                     # bytes of program space, as shown in the ban
 STATEMENTS = ["PRINT", "LET", "INPUT", "IF", "THEN", "ELSE", "FOR", "TO", "STEP", "NEXT", "GOTO", "GOSUB", "RETURN", "END",
               "STOP", "REM", "DIM", "DATA", "READ", "RESTORE", "CLS", "BEEP", "ON", "SLEEP", "RANDOMIZE",
               "RUN", "LIST", "NEW", "SAVE", "LOAD", "FILES", "DIR", "KILL", "RENUM", "DELETE", "CONT", "HELP", "VER", "FREE", "BYE", "SYSTEM",
-              "LOCATE", "BOX", "LINE"]
+              "LOCATE", "BOX", "LINE",
+              "OPEN", "CLOSE", "WINDOW", "TEXT", "BUTTON", "FIELD", "CHECK", "BAR", "WAIT", "NOTIFY", "MSGBOX"]
 OPERATORS = ["AND", "OR", "NOT", "MOD"]
 FUNCTIONS = ["ABS", "INT", "FIX", "SGN", "SQR", "SIN", "COS", "TAN", "ATN", "LOG", "EXP", "RND", "PI", "LEN", "VAL", "ASC",
-             "INSTR", "LEFT$", "RIGHT$", "MID$", "STR$", "CHR$", "UCASE$", "LCASE$", "TIME$", "DATE$", "TIMER", "TAB", "SPC"]
+             "INSTR", "LEFT$", "RIGHT$", "MID$", "STR$", "CHR$", "UCASE$", "LCASE$", "TIME$", "DATE$", "TIMER", "TAB", "SPC",
+             "EOF", "FIELD$", "CHECKED", "EXISTS"]
 KEYWORDS = sorted(set(STATEMENTS + OPERATORS + FUNCTIONS), key=len, reverse=True)
 
 
@@ -107,7 +113,7 @@ def tokenize(src: str) -> List[Token]:
             toks.append(("op", {"><": "<>", "=<": "<=", "=>": ">=", "**": "^"}.get(two, two)))
             i += 2
             continue
-        if ch in "+-*/^=<>(),;:":
+        if ch in "+-*/^=<>(),;:#":
             toks.append(("op", ch))
             i += 1
             continue
@@ -145,6 +151,10 @@ class Basic:
         self.stop_flag = threading.Event()
         self.running = False
         self.cont: Optional[Tuple[int, int]] = None
+        self.fs = None                                    # TalonFS (1.14): OPEN / PRINT # / INPUT # / CLOSE
+        self.cwd = "C:\\Documents"
+        self.gui = None                                   # a TalonOS window when run as an app (tos_basicapp.py)
+        self.channels: Dict[int, dict] = {}
         self.clear()
 
     # -- state
@@ -224,6 +234,7 @@ class Basic:
                     time.sleep(0.0005)                    # keep TalonSync responsive during tight loops
         finally:
             self.running = False
+            self.close_all()
 
     def _index_of(self, num: int, order=None) -> int:
         order = order if order is not None else self.order
@@ -323,7 +334,10 @@ class Basic:
         self.p += 1
         kw = val
         if kw == "PRINT":
-            self.do_print()
+            if self.at("op", "#"):
+                self.print_to_file()
+            else:
+                self.do_print()
         elif kw == "LET":
             self.assign()
         elif kw == "REM":
@@ -449,6 +463,8 @@ class Basic:
                 self.take()
         elif kw == "RESTORE":
             self.data_ptr = 0
+        elif kw == "INPUT" and self.at("op", "#"):
+            self.input_from_file()
         elif kw == "INPUT":
             prompt = "? "
             if self.at("str"):
@@ -476,7 +492,10 @@ class Basic:
                 except ValueError:
                     self.write("?REDO FROM START\n")
         elif kw == "CLS":
-            self.cls_fn()
+            if self.gui:
+                self.gui.cls()
+            else:
+                self.cls_fn()
             self.col = 0
         elif kw == "BEEP":
             self.beep_fn()
@@ -526,6 +545,21 @@ class Basic:
                 self.plot_fn(r1 + i * dr, c1 + i * dc, ch)
         elif kw in ("BYE", "SYSTEM"):
             raise ExitBasic()
+        elif kw == "OPEN":
+            self.do_open()
+        elif kw == "CLOSE":
+            if self.at("op", "#"):
+                self.take()
+                self.close_channel(int(self.num(self.expr())))
+                while self.at("op", ","):
+                    self.take()
+                    if self.at("op", "#"):
+                        self.take()
+                    self.close_channel(int(self.num(self.expr())))
+            else:
+                self.close_all()
+        elif kw in ("WINDOW", "TEXT", "BUTTON", "FIELD", "CHECK", "BAR", "WAIT", "NOTIFY", "MSGBOX"):
+            self.gui_statement(kw)
         elif kw in ("RUN", "LIST", "NEW", "SAVE", "LOAD", "FILES", "DIR", "KILL", "RENUM", "DELETE", "CONT", "HELP", "VER", "FREE"):
             return self.command(kw, direct)
         else:
@@ -648,6 +682,168 @@ class Basic:
                 return m.group(1) + str(mapping.get(n, n))
             return re.sub(r"((?:GOTO|GOSUB|THEN|ELSE)\s*)(\d+)", rep, body, flags=re.I)
         self.program = {mapping[n]: fix(self.program[n]) for n in old}
+
+    # -- files (TalonFS)
+    def _path_arg(self) -> str:
+        v = self.expr()
+        if not isinstance(v, str):
+            raise BasicError("TYPE MISMATCH")
+        return v
+
+    def do_open(self):
+        if not self.fs:
+            raise BasicError("NO DISK")
+        self.expect("op", "#")
+        n = int(self.num(self.expr()))
+        self.expect("op", ",")
+        path = self._path_arg()
+        mode = "I"
+        if self.at("op", ","):
+            self.take()
+            mode = str(self.expr()).strip().upper()[:1] or "I"
+        if not 1 <= n <= 4:
+            raise BasicError("BAD FILE NUMBER")
+        if n in self.channels:
+            raise BasicError("FILE ALREADY OPEN")
+        if mode not in "IOA":
+            raise BasicError("BAD FILE MODE")
+        from .tos_fs import FSError
+        try:
+            vp = self.fs.normalize(path, self.cwd)
+            if mode == "I":
+                lines = self.fs.read_text(vp).split("\n")
+                if lines and lines[-1] == "":
+                    lines.pop()
+                self.channels[n] = {"mode": "I", "path": vp, "lines": lines, "pos": 0}
+            else:
+                if vp.upper().startswith("A:"):
+                    raise FSError("A: is read only")
+                old = self.fs.read_text(vp) if mode == "A" and self.fs.exists(vp) else ""
+                self.channels[n] = {"mode": mode, "path": vp, "text": old}
+                self.fs.write_text(vp, old)                  # checks the name and the space now, not at CLOSE
+        except FSError as e:
+            msg = str(e).upper()
+            raise BasicError("FILE NOT FOUND" if "EXIST" in msg else "BAD FILE NAME" if "NAME" in msg else
+                             "DISK FULL" if "FULL" in msg or "BIG" in msg else "FILE ERROR")
+
+    def close_channel(self, n: int):
+        ch = self.channels.pop(n, None)
+        if ch and ch["mode"] in "OA" and self.fs:
+            from .tos_fs import FSError
+            try:
+                self.fs.write_text(ch["path"], ch["text"])
+            except FSError:
+                raise BasicError("DISK FULL")
+
+    def close_all(self):
+        for n in list(self.channels):
+            try:
+                self.close_channel(n)
+            except BasicError:
+                pass
+
+    def print_to_file(self):
+        self.take()                                       # '#'
+        n = int(self.num(self.expr()))
+        ch = self.channels.get(n)
+        if not ch or ch["mode"] == "I":
+            raise BasicError("BAD FILE NUMBER")
+        if self.at("op", ","):
+            self.take()
+        buf: List[str] = []
+        out, col = self.out, self.col
+        self.out, self.col = buf.append, 0
+        try:
+            self.do_print()
+        finally:
+            self.out, self.col = out, col
+        ch["text"] += "".join(buf)
+        if len(ch["text"]) > 1024 * 1024:
+            raise BasicError("DISK FULL")
+
+    def input_from_file(self):
+        self.take()                                       # '#'
+        n = int(self.num(self.expr()))
+        ch = self.channels.get(n)
+        if not ch or ch["mode"] != "I":
+            raise BasicError("BAD FILE NUMBER")
+        self.expect("op", ",")
+        targets = [self.lvalue()]
+        while self.at("op", ","):
+            self.take()
+            targets.append(self.lvalue())
+        if ch["pos"] >= len(ch["lines"]):
+            raise BasicError("INPUT PAST END")
+        line = ch["lines"][ch["pos"]]
+        ch["pos"] += 1
+        parts = [x.strip() for x in line.split(",")] if len(targets) > 1 else [line]
+        parts += [""] * (len(targets) - len(parts))
+        for tgt, part in zip(targets, parts):
+            if tgt[0].endswith("$"):
+                self.store(tgt, part)
+            else:
+                m = re.match(r"\s*[-+]?\d*\.?\d*(E[-+]?\d+)?", part.upper())
+                try:
+                    self.store(tgt, float(m.group(0)))
+                except ValueError:
+                    self.store(tgt, 0.0)
+
+    # -- TalonOS windows
+    def gui_statement(self, kw: str):
+        def text_arg():
+            v = self.expr()
+            return v if isinstance(v, str) else fmt_num(v).strip()
+        if kw in ("NOTIFY", "MSGBOX") and not self.gui:
+            self.write(text_arg() + "\n")                  # in the terminal these just print
+            return
+        if not self.gui:
+            raise BasicError("TALONOS ONLY")
+        g = self.gui
+        if kw == "WINDOW":
+            g.window(text_arg())
+        elif kw == "TEXT":
+            r, c = (int(v) for v in self.nums(2))
+            self.expect("op", ",")
+            g.text(r, c, text_arg())
+        elif kw == "BUTTON":
+            n, r, c, w = (int(v) for v in self.nums(4))
+            self.expect("op", ",")
+            g.button(n, r, c, w, text_arg())
+        elif kw == "FIELD":
+            n, r, c, w = (int(v) for v in self.nums(4))
+            t = None
+            if self.at("op", ","):
+                self.take()
+                t = text_arg()
+            g.field(n, r, c, w, t)
+        elif kw == "CHECK":
+            n, r, c = (int(v) for v in self.nums(3))
+            self.expect("op", ",")
+            label = text_arg()
+            on = None
+            if self.at("op", ","):
+                self.take()
+                on = bool(self.num(self.expr()))
+            g.check(n, r, c, label, on)
+        elif kw == "BAR":
+            r, c, w = (int(v) for v in self.nums(3))
+            self.expect("op", ",")
+            g.bar(r, c, w, float(self.num(self.expr())))
+        elif kw == "WAIT":
+            target = self.lvalue()
+            secs = None
+            if self.at("op", ","):
+                self.take()
+                secs = float(self.num(self.expr()))
+            ev = g.wait(secs, self.stop_flag)
+            if ev is None:
+                raise Break()
+            self.store(target, float(ev))
+        elif kw == "NOTIFY":
+            g.notify(text_arg())
+        elif kw == "MSGBOX":
+            if g.msgbox(text_arg(), self.stop_flag) is None:
+                raise Break()
 
     # -- PRINT
     def do_print(self):
@@ -842,6 +1038,24 @@ class Basic:
         if f == "RND":
             x = self.num(self.args(1, 1)[0]) if self.at("op", "(") else 1.0
             return float(random.randint(1, int(x))) if x > 1 else random.random()
+        if f == "EOF":
+            ch = self.channels.get(int(self.num(self.args(1, 1)[0])))
+            if not ch or ch["mode"] != "I":
+                raise BasicError("BAD FILE NUMBER")
+            return -1.0 if ch["pos"] >= len(ch["lines"]) else 0.0
+        if f == "EXISTS":
+            p = self.args(1, 1)[0]
+            if not isinstance(p, str):
+                raise BasicError("TYPE MISMATCH")
+            try:
+                return -1.0 if self.fs and self.fs.exists(p, self.cwd) else 0.0
+            except Exception:
+                return 0.0
+        if f in ("FIELD$", "CHECKED"):
+            n = int(self.num(self.args(1, 1)[0]))
+            if not self.gui:
+                raise BasicError("TALONOS ONLY")
+            return self.gui.field_text(n) if f == "FIELD$" else (-1.0 if self.gui.checked(n) else 0.0)
         a = self.args(1, 3)
         N = lambda i: self.num(a[i])
         def S(i):
@@ -905,6 +1119,12 @@ HELP_TEXT = [
     "LINE R1,C1,R2,C2 (ROW 0-7,",
     "COLUMN 0-29). CHR$(5-31) ARE",
     "LINE GRAPHICS, SEE MANUAL.",
+    "FILES: OPEN #1,\"NOTE.TXT\",\"O\"",
+    "PRINT #1,A$  INPUT #1,A$",
+    "CLOSE #1  EOF(1). APPS: WINDOW",
+    "TEXT BUTTON FIELD CHECK BAR",
+    "WAIT FIELD$ CHECKED NOTIFY",
+    "MSGBOX (SEE THE SDK GUIDE)",
     "BYE leaves BASIC. TALONOS",
     "opens the desktop.",
     "\x02 break  \x03 repeat  Up/Dn scroll",

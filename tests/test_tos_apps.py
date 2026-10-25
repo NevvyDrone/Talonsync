@@ -4,7 +4,7 @@ Files and the Recycle Bin do real work."""
 import os, random, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from talonsync.terminal import Terminal, GUI_X0, GUI_Y0, GUI_RH, INK_COLS
-from talonsync.tos_apps import REGISTRY, list_files
+from talonsync.tos_apps import REGISTRY
 from talonsync import tos_games as TG
 
 class Link:
@@ -22,7 +22,7 @@ def problem():
     return any("has a problem" in row for row in g.render().text_rows())
 
 # ---- 1. every app: opens, draws, and random keys / typing never break it (both themes)
-apps = [k for k, v in REGISTRY.items() if v["cls"] and k not in ("msg", "prompt", "shutdown")]
+apps = [k for k, v in REGISTRY.items() if v["cls"] and k not in ("msg", "prompt", "shutdown", "basicapp")]
 for theme in ("classic", "skyglass"):
     g.cfg["theme"] = theme
     for app_id in apps:
@@ -74,7 +74,7 @@ print("touch ok")
 
 # ---- 2b. no text runs onto or past a window's right edge
 for app_id in apps + ["msg", "shutdown"]:
-    g.boot(); g.splash_until = 0
+    g.boot(); g.splash_until = 0; g.kernel.notes = []                       # (a notification balloon may cover windows)
     app = g.launch(app_id) if app_id != "msg" else g.launch("msg", title="Delete", text="Move OWL.TXT to the Recycle Bin?", buttons=("Yes", "No"))
     sc = g.render(); r0, c0, r1, c1 = app.rect
     for r in range(r0 + 1, r1 + 1):
@@ -97,24 +97,27 @@ assert calc_run("123<") == "12"
 assert calc_run("0.1+0.2=") == "0.3"
 calc.clear(); g.typed("6x7="); assert calc.shown == "42", calc.shown
 
-# ---- 4. Notepad, Files, Recycle Bin (real files); the fuzzing above may have binned a few, so start empty
-import shutil; shutil.rmtree(os.path.join(a.dir, "Recycled"), ignore_errors=True)
+# ---- 4. Notepad, My Files, Recycle Bin (real files in TalonFS); the fuzzing above may have binned a few, so start empty
+fs = g.kernel.fs
+fs.empty_bin()
 g.boot(); np = g.launch("notepad")
 for line in ["A very long line that will wrap around the window edge", "short"]: np.typed(line)
 assert all(len(l) <= 28 for l in np.lines) and "short" in np.lines, np.lines
-np.save()                                                               # no name yet: asks
-assert g.window == "prompt"; g.typed("my note!"); assert g.top.value == "MYNOTE"; g.top.ok()
-assert os.path.exists(os.path.join(a.dir, "Documents", "mynote.txt"))
+np.save()                                                               # no name yet: Save As
+assert g.window == "filedlg"; g.typed("my note"); g.top.ok()
+assert os.path.exists(os.path.join(a.dir, "Documents", "my note.txt")), os.listdir(os.path.join(a.dir, "Documents"))
+assert np.path == "C:\\Documents\\my note.txt" and not np.changed, np.path
 os.makedirs(t.basic.folder, exist_ok=True)
 open(os.path.join(t.basic.folder, "HELLO.bas"), "w").write('10 PRINT "HI"\n')
-names = [n for n, k, p in list_files(g)]
-assert "MYNOTE.TXT" in names and "HELLO.BAS" in names, names
-g.boot(); f = g.launch("files"); g.render()
-f.list.sel = names.index("MYNOTE.TXT"); f.delete(); assert g.window == "msg"; g.top.answer("Yes")
-assert "MYNOTE.TXT" not in [n for n, k, p in list_files(g)]
-b = g.launch("bin"); assert b.items() == ["mynote.txt"], b.items(); b.restore()
-assert "MYNOTE.TXT" in [n for n, k, p in list_files(g)] and not b.items()
-f.refresh(); f.list.sel = [n for n, k, p in f.items].index("HELLO.BAS"); f.delete(); g.top.answer("Yes")
+g.boot(); f = g.launch("explorer", path="C:\\Documents"); g.render()
+names = [n for n, k, p in f.items]
+assert "MY NOTE.TXT" in names, names
+f.list.sel = names.index("MY NOTE.TXT"); f.delete(); assert g.window == "msg"; g.top.answer("Yes")
+assert not fs.exists("C:\\Documents\\my note.txt")
+b = g.launch("bin"); assert b.items() == ["my note.txt"], b.items()
+assert fs.bin_items()[0][1] == "C:\\Documents\\my note.txt"            # the bin remembers where it came from
+b.restore(); assert fs.exists("C:\\Documents\\my note.txt") and not b.items()
+f.b.go("C:\\Programs"); f.refresh(); f.list.sel = [n for n, k, p in f.items].index("HELLO.BAS"); f.delete(); g.top.answer("Yes")
 b.empty(); g.top.answer("Yes"); assert not b.items()
 assert not os.path.exists(os.path.join(t.basic.folder, "HELLO.bas"))
 # closing an edited note asks first

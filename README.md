@@ -17,6 +17,8 @@ TalonSync is the PC companion for the Talon Pilot VRChat PDA. It syncs your PDA 
 - **Games:** Guess My Number, Rock Paper Talon, Feather Pile, Moon Lander, Tic-Tac-Talon, Featherword, Aerie Keeper,
   Talon Dice, Find the Mouse, Ponder the Owl and Math Drill, as windowed apps you play by tapping (best scores kept).
 - **BASIC Programs:** the same games written in BASIC, plus Learn BASIC and four demos, to run, read and change.
+- **Make your own apps:** windowed BASIC apps and file I/O, and opt-in Python plugins
+  ([the SDK guide](docs/TalonOS_SDK.md)).
 - **Talon Enhanced BASIC:** a line-numbered home-computer BASIC with line graphics (`BOX`, `LINE`, `LOCATE`), saved
   programs and a local terminal with its own commands.
 - **TalonStar 4000:** a retro cable-weather channel (free weather from Open-Meteo, no account) with smooth jazz, on your
@@ -173,8 +175,19 @@ taskbar from them, so it adds no animator layers and nothing runs per frame. Tap
 over OSC. On the desktop: tap anything, or Up/Down to move between controls, Center to press, Left to go back or close,
 Right for the Start menu. Typed lines go into the box with the cursor; on the desktop, typing a program's name opens it.
 
-The Start menu has Programs (BASIC Programs, BASIC, Terminal, My Files), Accessories (Notepad, Calculator, Date/Time,
-System Monitor), Games, Documents, Settings (Control Panel), Help and Shut Down. Control Panel switches between the
+The Start menu has Programs (BASIC Programs, BASIC, Terminal, My Files, Task Manager and your installed apps),
+Accessories (Notepad, Calculator, Date/Time, System Monitor), Games, Documents (recent files), Settings (Control Panel,
+Help, About), Run and Shut Down.
+
+**A real little OS underneath (1.14):** a kernel with processes (Task Manager shows them and can end one; a crashing
+app closes alone), an event bus, a settings registry, a clipboard and notifications; **TalonFS**, a file system with
+`C:\Documents`, `C:\Programs`, `C:\Apps`, `C:\Recycled`, `C:\Temp` and a read-only `A:` disk of built-in programs, all
+sandboxed inside TalonSync's data folder; My Files with folders, copy and paste; Open and Save As boxes.
+
+**Write your own apps:** a BASIC program that uses `WINDOW` runs as a windowed app with buttons, text boxes, check
+boxes and progress bars, and BASIC can read and write files (`OPEN #`, `PRINT #`, `INPUT #`). Python plugins work
+too, but they're off until you allow them in Control Panel, and each one asks before it runs. The guide is
+[docs/TalonOS_SDK.md](docs/TalonOS_SDK.md). Control Panel switches between the
 **Classic** and **Skyglass** looks (Skyglass needs Talon Pilot 2.20), sets the clock, beeps and the start-up screen,
 and chooses whether the desktop comes back when the PDA switches on. Settings and best scores are saved in
 `talonos.json` in TalonSync's data folder, Notepad's notes in `Documents`, and deleted files go to `Recycled` until you

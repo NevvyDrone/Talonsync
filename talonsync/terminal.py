@@ -80,6 +80,13 @@ class Terminal:
         self.lib_page, self.lib_pick, self.lib_state = 0, 0, "list"
         from . import __version__
         self.gui = Desktop(self, __version__)              # TalonOS Enhanced
+        for vm in (self.basic, self.libvm):                # 1.14: OPEN / PRINT # / INPUT # use TalonFS
+            vm.fs = self.gui.kernel.fs
+        try:
+            from .tos_basicapp import install_samples
+            install_samples(self.gui)
+        except Exception:
+            pass
         self.return_gui = False                            # a program / BASIC / terminal started from the desktop
         self.touch_rows, self.touch_cols = set(), set()
         self._touch_timer: Optional[threading.Timer] = None
@@ -471,7 +478,10 @@ class Terminal:
     def open_program(self, name: str, run: bool = False):
         """From My Files: put a saved program into BASIC (full screen) and LIST or RUN it; Left comes back."""
         name = self.program_name(name)
-        source = self.program_read(name)
+        self.open_source(name, self.program_read(name), run)
+
+    def open_source(self, name: str, source: str, run: bool = False):
+        name = re.sub(r"[^A-Z0-9_]", "", name.upper())[:8] or "PROGRAM"
         if self.worker and self.worker.is_alive():
             return
         self._keep_old()
@@ -813,7 +823,12 @@ class Terminal:
         vm.program = {}
         for raw in source.splitlines():
             if raw.strip():
-                vm.enter(raw)
+                try:
+                    vm.enter(raw)
+                except BasicError:                         # keep a line with a mistake so it can be fixed (LIST / EDIT)
+                    m = re.match(r"\s*(\d+)\s?(.*)$", raw)
+                    if m:
+                        vm.program[int(m.group(1))] = m.group(2).strip()
         vm.clear()
 
     def _run_lib(self, p):

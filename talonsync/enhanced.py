@@ -39,6 +39,7 @@ class Screen:
         self.cells = [[[" ", style] for _ in range(COLS)] for _ in range(ROWS)]
         self.spots: List[Tuple[int, int, int, int, Callable]] = []      # (row0, col0, row1, col1, action): tap targets
         self.background: set = set()                                     # spots that are only a window's body or title
+        self.owners: Dict[int, object] = {}                              # spot index -> the app that drew it
 
     def fill(self, r0, c0, r1, c1, style, ch=" "):
         for r in range(max(0, r0), min(ROWS - 1, r1) + 1):
@@ -70,6 +71,10 @@ class Screen:
         return -1
 
     def hit(self, r, c, cx: Optional[float] = None) -> Optional[Callable]:
+        i = self.hit_index(r, c, cx)
+        return self.spots[i][4] if i >= 0 else None
+
+    def hit_index(self, r, c, cx: Optional[float] = None) -> int:
         """The control under a tap. The PDA's touch grid is coarser than the screen (24 contacts across 30 cells), so
         when the cell itself is only window background, the nearest control within reach of the fingertip wins."""
         i = self._hit(r, c)
@@ -80,7 +85,7 @@ class Screen:
                 if j >= 0 and j not in self.background and (best < 0 or best in self.background):
                     best = j
             i = best
-        return self.spots[i][4] if i >= 0 else None
+        return i
 
     def rows(self) -> List[List[Tuple[str, int]]]:
         return [[(ch, st) for ch, st in row] for row in self.cells]
@@ -307,7 +312,7 @@ class Desktop:
 
     # label, picture (A-P = the PDA's icons, f folder, p prompt, r bin), app id, anchor row, anchor column
     ICONS = [
-        ("Files", "f", "files", 0, 4), ("Settings", "G", "control", 0, 13), ("Games", "M", "games", 0, 24),
+        ("My Files", "f", "explorer", 0, 4), ("Settings", "G", "control", 0, 13), ("Games", "M", "games", 0, 24),
         ("Notepad", "D", "notepad", 2, 4), ("Calculator", "E", "calc", 2, 13), ("BASIC", "I", "basic", 2, 24),
         ("Terminal", "p", "terminal", 4, 4), ("Programs", "f", "library", 4, 13), ("Recycle Bin", "r", "bin", 4, 24),
     ]
@@ -328,9 +333,12 @@ class Desktop:
         self.screen = Screen()
         self.last_ui: Optional[UI] = None
         self.cfg = {"theme": "classic", "clock24": False, "seconds": False, "sounds": True, "splash": True,
-                    "resume": True}
+                    "resume": True, "plugins": False}
         self.scores: Dict[str, object] = {}
+        self.registry_store: Dict[str, object] = {}
         self._load()
+        from .tos_kernel import Kernel
+        self.kernel = Kernel(self)                     # 1.14: processes, TalonFS, events, registry, the public API
 
     # ------------------------------------------------------------------ settings (talonos.json in TalonSync's folder)
     @property
@@ -346,6 +354,7 @@ class Desktop:
                 data = json.load(f)
             self.cfg.update({k: v for k, v in data.get("settings", {}).items() if k in self.cfg})
             self.scores = data.get("scores", {}) or {}
+            self.registry_store.update(data.get("registry", {}) or {})
         except Exception:
             pass
         if self.cfg.get("theme") not in THEMES:
@@ -356,7 +365,7 @@ class Desktop:
             os.makedirs(self.folder, exist_ok=True)
             tmp = self._path() + ".tmp"
             with open(tmp, "w", encoding="utf-8") as f:
-                json.dump({"settings": self.cfg, "scores": self.scores}, f, indent=1)
+                json.dump({"settings": self.cfg, "scores": self.scores, "registry": self.registry_store}, f, indent=1)
             os.replace(tmp, self._path())
         except Exception:
             pass
@@ -364,6 +373,9 @@ class Desktop:
     def set(self, key: str, value):
         self.cfg[key] = value
         self.save()
+        k = getattr(self, "kernel", None)
+        if k:
+            k.events.emit("settings.changed", {key: value})
 
     def beep(self):
         if self.cfg.get("sounds", True):
@@ -374,7 +386,7 @@ class Desktop:
         with self.lock:
             self.menu_open, self.sub_open, self.icon, self.safe = False, None, 0, False
             for a in list(self.apps):
-                a.closing()
+                self.close(a, force=True)
             self.apps = []
             self.splash_until = time.time() + (2.6 if self.cfg.get("splash", True) else 0.0)
 
@@ -409,17 +421,34 @@ class Desktop:
                 self.term.leave_gui(app_id)
                 return None
             spec = REGISTRY.get(app_id)
-            if not spec:
+            if not spec or not spec.get("cls"):
                 return None
-            cls = spec["cls"]
+            return self.start(spec["cls"], app_id, spec.get("name", app_id), spec.get("kind", "system"), **kw)
+
+    def start(self, _cls, _app_id: str, _name: str, _kind: str = "system", **kw) -> Optional[App]:
+        """Make a process for an app and open its window (or bring the open one forward)."""
+        cls, app_id, name, kind = _cls, _app_id, _name, _kind
+        with self.lock:
             if getattr(cls, "single", True) and not kw:
                 for a in self.apps:
                     if getattr(a, "app_id", None) == app_id:
                         self.raise_(a)
                         return a
-            a = cls(self, **kw)
+            a = cls.__new__(cls)
             a.app_id = app_id
+            p = self.kernel.attach(a, name, kind)
+            ok = [False]
+
+            def init():
+                cls.__init__(a, self, **kw)
+                ok[0] = True
             self.apps.append(a)
+            self.kernel.run(a, init, where="start")
+            if not ok[0]:
+                if a in self.apps:
+                    self.apps.remove(a)
+                self.kernel.detach(a)
+                return None
             return a
 
     def raise_(self, a: App):
@@ -428,11 +457,16 @@ class Desktop:
             self.apps.append(a)
             a.minimized = False
 
-    def close(self, a: App):
+    def close(self, a: App, force: bool = False):
         with self.lock:
             if a in self.apps:
-                a.closing()
                 self.apps.remove(a)
+                if getattr(a, "pid", None) in self.kernel.procs:
+                    try:
+                        self.kernel.run(a, a.closing, where="closing")
+                    except Exception:
+                        pass
+                    self.kernel.detach(a)
 
     def minimize(self, a: App):
         a.minimized = True
@@ -456,8 +490,8 @@ class Desktop:
                 return sc
             self._desktop(sc)
             top = self.top
-            for a in self.apps:
-                if a.minimized:
+            for a in list(self.apps):
+                if a.minimized or a not in self.apps:
                     continue
                 active = a is top and not self.menu_open
                 ui = self._frame(sc, a, active)
@@ -466,6 +500,11 @@ class Desktop:
             if self.menu_open:
                 self._menu(sc)
             self._taskbar(sc)
+            note = self.kernel.current_note()
+            if note and not self.menu_open:                  # a notification balloon above the clock
+                w = min(28, len(note) + 2)
+                sc.fill(6, 29 - w, 6, 29, S.TIP)
+                sc.text(6, 30 - w, note[:w - 2], S.TIP)
             self._hide_covered_icons(sc)
             self.screen = sc
             return sc
@@ -499,12 +538,10 @@ class Desktop:
         sc.spot(r0, c1 - 2, r0, c1 - 2, lambda a=a: self.minimize(a))
         sc.spot(r0, c1 - 1, r0, c1 - 1, lambda a=a: a.back())
         ui = UI(sc, a, active, (r0 + 1, c0 + 1, r1, c1 - 1))
-        try:
-            a.draw(ui, r0 + 1, c0 + 1, r1, c1 - 1)
-        except Exception as e:                                       # a broken app never takes the desktop down
-            sc.fill(r0 + 1, c0 + 1, r1, c1 - 1, S.FACE)
-            sc.text(r0 + 2, c0 + 1, "This program has a problem:"[:c1 - c0 - 1], S.FACE)
-            sc.text(r0 + 3, c0 + 1, str(e)[:c1 - c0 - 1], S.FACE)
+        n0 = len(sc.spots)
+        self.kernel.run(a, a.draw, ui, r0 + 1, c0 + 1, r1, c1 - 1, where="draw")   # a broken app is closed, never the OS
+        for i in range(n0, len(sc.spots)):
+            sc.owners[i] = a
         if not active:                                               # a tap on a window behind brings it forward
             sc.spot(r0 + 1, c0, r1, c1, lambda a=a: self.raise_(a), background=True)
         if ui.focusables:
@@ -542,8 +579,8 @@ class Desktop:
 
     # ------------------------------------------------------------------ Start menu
     def menu_items(self):
-        from .tos_apps import START_MENU
-        return START_MENU
+        from .tos_apps import start_menu
+        return start_menu(self)
 
     def _menu(self, sc: Screen):
         items = self.menu_items()
@@ -572,12 +609,15 @@ class Desktop:
         for k in range(h):
             sc.text(r0 + k, 13, "\u2502", S.FACE)                    # a line between the menu and its submenu
             j = self.sub_top + k
-            app_id = sub[j]
-            label = REGISTRY[app_id].get("menu", REGISTRY[app_id]["name"]) if app_id in REGISTRY else app_id
+            item = sub[j]
+            if isinstance(item, tuple):
+                label = item[0]
+            else:
+                label = REGISTRY[item].get("menu", REGISTRY[item]["name"]) if item in REGISTRY else item
             st = S.MENU_SEL if j == self.sub_sel else S.FACE
             sc.fill(r0 + k, 14, r0 + k, 29, st)
             sc.text(r0 + k, 14, label[:16], st)
-            sc.spot(r0 + k, 14, r0 + k, 29, lambda a=app_id: self.launch(a))
+            sc.spot(r0 + k, 14, r0 + k, 29, lambda it=item: self.menu_run(it))
         if self.sub_top > 0:
             sc.text(r0, 29, "^", S.MENU_SEL if self.sub_sel == self.sub_top else S.FACE)
         if self.sub_top + h < n:
@@ -599,6 +639,20 @@ class Desktop:
         else:
             self.launch(target)
 
+    def menu_run(self, item):
+        self.menu_open, self.sub_open = False, None
+        if isinstance(item, tuple):
+            try:
+                item[1]()
+            except Exception as e:
+                self.launch("msg", title="TalonOS", text=str(e)[:69])
+        else:
+            self.launch(item)
+
+    def launch_plugin(self, vpath: str):
+        from .tos_plugins import launch_plugin
+        return launch_plugin(self, vpath)
+
     def toggle_menu(self):
         self.menu_open = not self.menu_open
         self.menu_sel, self.sub_open = 0, None
@@ -618,10 +672,8 @@ class Desktop:
                 self.term.leave_gui("menu")
                 return False
             for a in list(self.apps):
-                try:
-                    a.tick()
-                except Exception:
-                    pass
+                if a in self.apps:
+                    self.kernel.run(a, a.tick, where="tick")
             return True
 
     def shut_down(self):
@@ -643,7 +695,7 @@ class Desktop:
             if a is None:
                 self._desktop_key(k)
                 return
-            if a.key(k):
+            if self.kernel.run(a, a.key, k, where="key"):
                 return
             ui = self.last_ui if self.last_ui and self.last_ui.app is a else None
             if ui is None:
@@ -654,15 +706,15 @@ class Desktop:
                 d = 1 if k == "down" else -1
                 if fl:
                     kind, act, data = fl[min(a.focus, len(fl) - 1)]
-                    if kind == "list" and data(d):
+                    if kind == "list" and self.kernel.run(a, data, d, where="key"):
                         return
                     a.focus = (a.focus + d) % len(fl)
             elif k == "enter":
                 if fl:
                     kind, act, data = fl[min(a.focus, len(fl) - 1)]
-                    act()
+                    self.kernel.run(a, act, where="press")
             elif k == "back":
-                a.back()
+                self.kernel.run(a, a.back, where="back")
 
     def _menu_key(self, k: str):
         items = self.menu_items()
@@ -671,7 +723,7 @@ class Desktop:
             if k in ("up", "down"):
                 self.sub_sel = (self.sub_sel + (1 if k == "down" else -1)) % len(sub)
             elif k in ("enter", "start"):
-                self.launch(sub[self.sub_sel])
+                self.menu_run(sub[self.sub_sel])
             elif k == "back":
                 self.sub_open = None
             return
@@ -722,9 +774,9 @@ class Desktop:
             if fl:
                 kind, act, data = fl[min(a.focus, len(fl) - 1)]
                 if kind == "field" and data:
-                    data(text)
+                    self.kernel.run(a, data, text, where="typed")
                     return
-            if a.typed(text):
+            if self.kernel.run(a, a.typed, text, where="typed"):
                 return
             if not t:
                 self.key("enter")
@@ -754,6 +806,12 @@ class Desktop:
                 if not in_menu and not in_sub and not (r == 7 and c <= 7):
                     self.menu_open, self.sub_open = False, None   # a tap outside the menu closes it
                     return
-            action = self.screen.hit(r, c, cx)
-            if action:
+            self.render()                                 # hit-test what's on screen now, not an older frame
+            i = self.screen.hit_index(r, c, cx)
+            if i < 0:
+                return
+            action, owner = self.screen.spots[i][4], self.screen.owners.get(i)
+            if owner is not None and owner in self.apps:
+                self.kernel.run(owner, action, where="tap")
+            else:
                 action()

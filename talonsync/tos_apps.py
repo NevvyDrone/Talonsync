@@ -1,5 +1,6 @@
-"""TalonOS Enhanced system apps (TalonSync 1.13): Control Panel, Files, Recycle Bin, Notepad, Calculator, Date/Time,
-System Monitor, Help, the BASIC program library, the Games folder and small dialogs.
+"""TalonOS Enhanced system apps (TalonSync 1.14): Control Panel, My Files (Explorer), Open / Save As, Recycle Bin,
+Notepad, Calculator, Date/Time, System Monitor, Task Manager, Run, Help, the BASIC program library, the Games folder
+and small dialogs. They use the public API (self.api, see tos_kernel.py) like any third-party app.
 
 Every window is drawn fresh each frame with the toolkit in enhanced.py; the inside of a full window is rows 1-6 and
 columns 1-28 (row 7 is the taskbar)."""
@@ -13,6 +14,7 @@ from typing import Callable, List, Optional
 
 from . import library
 from .enhanced import App, ListState, S, THEMES, THEME_NAMES, UI, nice, wrap
+from .tos_fs import FSError, TalonFS, human_size, vbasename, vdirname
 
 DOC_EXT = ".TXT"
 
@@ -32,7 +34,9 @@ class MessageBox(App):
 
     def __init__(self, os_, title="TalonOS", text="", buttons=("OK",), done: Optional[Callable[[str], None]] = None):
         super().__init__(os_)
-        self.title, self.lines, self.buttons, self.done = title, wrap(text, 23)[:3], buttons, done
+        self.title, self.lines, self.buttons, self.done = title, wrap(text, 23)[:5], buttons, done
+        if len(self.lines) > 3:                             # a longer message gets a taller box
+            self.rect = (0, 2, 6, 27)
 
     def draw(self, ui: UI, r0, c0, r1, c1):
         for k, line in enumerate(self.lines):
@@ -60,17 +64,18 @@ class Prompt(App):
     rect = (1, 2, 5, 27)
     single = False
 
-    def __init__(self, os_, title="Save As", prompt="File name:", value="", done: Optional[Callable[[str], None]] = None):
+    def __init__(self, os_, title="Save As", prompt="File name:", value="", done: Optional[Callable[[str], None]] = None,
+                 free: bool = False):
         super().__init__(os_)
-        self.title, self.prompt, self.value, self.done = title, prompt, value, done
+        self.title, self.prompt, self.value, self.done, self.free = title, prompt, value, done, free
 
     def set_value(self, text: str):
-        self.value = _safe_name(text) or self.value
+        self.value = (text.strip()[:32] if self.free else _safe_name(text)) or self.value
 
     def draw(self, ui: UI, r0, c0, r1, c1):
         ui.label(r0, c0 + 1, self.prompt)
         ui.field(r0 + 1, c0 + 1, c1 - 1, self.value, self.set_value, placeholder="type a name")
-        ui.label(r0 + 2, c0 + 1, "Letters and numbers, up to 8.")
+        ui.label(r0 + 2, c0 + 1, "Up to 32 letters." if self.free else "Letters and numbers, up to 8.")
         ui.button(r1, c0 + 4, c0 + 10, "OK", self.ok)
         ui.button(r1, c1 - 10, c1 - 3, "Cancel", self.back)
 
@@ -116,7 +121,7 @@ class ControlPanel(App):
     title = "Control Panel"
     icon = "G"
     short = "Panel"
-    APPLETS = ["Display", "Date/Time", "Sounds", "Start-up", "System", "About"]
+    APPLETS = ["Display", "Date/Time", "Sounds", "Start-up", "Storage", "Plugins", "System", "About"]
 
     def __init__(self, os_, page: str = ""):
         super().__init__(os_)
@@ -163,6 +168,42 @@ class ControlPanel(App):
         ui.radio(r0 + 3, x, "Start menu", not cfg.get("resume", True), lambda: self.os.set("resume", False))
         ui.label(r0 + 5, x, "(if TalonOS was on)")
 
+    def _storage(self, ui, r0, x, r1, c1):
+        from .tos_fs import MAX_DRIVE
+        fs = self.os.kernel.fs
+        used = fs.used()
+        ui.label(r0, x, "Drive C:", S.FACE_BLUE)
+        ui.progress(r0 + 1, x, c1, used / MAX_DRIVE)
+        ui.label(r0 + 2, x, f"{human_size(used)} of 64M used"[:c1 - x + 1])
+        ui.label(r0 + 3, x, f"Bin: {len(fs.bin_items())} items"[:c1 - x + 1])
+        ui.button(r1 - 1, x, x + 8, "Open C:", lambda: self.os.launch("explorer", path="C:\\"))
+        ui.button(r1, x, x + 10, "Empty bin", lambda: self.os.launch("bin"))
+
+    def _plugins(self, ui, r0, x, r1, c1):
+        cfg = self.os.cfg
+        ui.check(r0, x, "Allow Python", cfg.get("plugins", False), self._allow)
+        ui.label(r0 + 1, x + 4, "plugins")
+        from .tos_plugins import list_plugins
+        n = len(list_plugins(self.os))
+        ui.label(r0 + 2, x, f"{n} in C:\\Apps"[:c1 - x + 1])
+        ui.label(r0 + 3, x, "Only run ones")
+        ui.label(r0 + 4, x, "you trust!")
+        ui.button(r1, x, x + 11, "Forget trust", self._forget)
+
+    def _allow(self, v: bool):
+        if not v:
+            self.os.set("plugins", False)
+            return
+        def answer(b):
+            if b == "Yes":
+                self.os.set("plugins", True)
+        self.api.ui.message("Python plugins can run any code on your PC. Allow them?", title="Plugins",
+                            buttons=("Yes", "No"), done=answer)
+
+    def _forget(self):
+        self.os.kernel.registry.set("system.trusted_plugins", {})
+        self.api.notify("Plugins will ask again")
+
     def _system(self, ui, r0, x, r1, c1):
         w = c1 - x + 1
         ui.label(r0, x, f"TalonSync {self.os.version}"[:w], S.FACE_BLUE)
@@ -175,8 +216,9 @@ class ControlPanel(App):
         ui.label(r0 + 2, x, f"BASIC {MEMORY - self.os.term.basic.used()} free"[:w])
         m = int(time.time() - self.os.term.started) // 60
         ui.label(r0 + 3, x, f"Up {m // 60}h {m % 60:02d}m"[:w])
-        ui.label(r0 + 4, x, f"Windows open {len(self.os.apps)}"[:w])
-        ui.button(r1, x, x + 12, "Monitor...", lambda: self.os.launch("sysmon"))
+        ui.label(r0 + 4, x, f"Processes {len(self.os.kernel.procs)}"[:w])
+        ui.button(r1, x, x + 7, "Tasks", lambda: self.os.launch("taskmgr"))
+        ui.button(r1, x + 9, c1, "Monitor", lambda: self.os.launch("sysmon"))
 
     def _about(self, ui, r0, x, r1, c1):
         ui.icon(r0 + 1, x + 1, "o", S.OWL)
@@ -191,85 +233,257 @@ class ControlPanel(App):
 
 
 # ---------------------------------------------------------------------------------------------------------- files
-def _docs(os_) -> str:
-    return os.path.join(os_.folder, "Documents")
-
-
-def _bin(os_) -> str:
-    return os.path.join(os_.folder, "Recycled")
-
-
-def list_files(os_) -> List[tuple]:
-    """(display name, kind, full path) for your BASIC programs and your Notepad documents."""
+def fs_rows(entries) -> List[str]:
     out = []
-    prog = os_.term.basic.folder
-    for folder, ext, kind in ((prog, ".bas", "Program"), (_docs(os_), ".txt", "Document")):
-        try:
-            for f in sorted(os.listdir(folder)):
-                if f.lower().endswith(ext) and not f.startswith("_"):
-                    out.append((f[:-4].upper() + ext.upper(), kind, os.path.join(folder, f)))
-        except OSError:
-            pass
+    for e in entries:
+        tail = "<DIR>" if e.is_dir else human_size(e.size)
+        out.append(f"{e.name[:21]:<21}{tail:>6}")
     return out
 
 
-class Files(App):
-    title = "My Files"
-    icon = "f"
-    short = "Files"
+class Browser:
+    """Folder browsing shared by Explorer and the Open / Save dialogs."""
 
-    def __init__(self, os_):
-        super().__init__(os_)
+    def __init__(self, app: App, folder: str, types=None):
+        self.app, self.types = app, tuple(t.upper() for t in types) if types else None
         self.list = ListState()
-        self.items: List[tuple] = []
+        self.folder = app.api.fs.normalize(folder or "C:\\Documents")
+        self.entries = []
+        self.error = ""
         self.refresh()
 
     def refresh(self):
-        self.items = list_files(self.os)
+        try:
+            es = self.app.api.fs.listdir(self.folder)
+            self.entries = [e for e in es if e.is_dir or not self.types or e.ext in self.types]
+            self.error = ""
+        except FSError as e:
+            self.entries, self.error = [], str(e)
+
+    def sel(self):
+        return self.entries[self.list.sel] if self.entries else None
+
+    def go(self, path: str):
+        fs = self.app.api.fs
+        vp = fs.normalize(path, cwd=self.folder)
+        if not fs.isdir(vp):
+            raise FSError(f"{vp} isn't a folder")
+        self.folder, self.list = vp, ListState()
+        self.refresh()
+
+    def up(self):
+        drive, parts = TalonFS.split(self.folder)
+        if parts:
+            self.go(TalonFS.join(drive, parts[:-1]))
+        elif drive == "A":
+            self.go("C:\\")
+        else:
+            self.go("A:\\")
+
+
+class Explorer(App):
+    """My Files: drives, folders and files. Open uses the file's type (Notepad, a BASIC app, a plugin)."""
+    title = "My Files"
+    icon = "f"
+    short = "Files"
+    single = False
+
+    def __init__(self, os_, path: str = "C:\\Documents"):
+        super().__init__(os_)
+        self.b = Browser(self, path)
+        self.api.events.on("fs.changed", lambda vp: self.b.refresh())
+        self.status = ""
+
+    @property
+    def items(self):                                        # (name, kind, path) like the 1.13 My Files
+        return [(e.name.upper(), e.kind, e.path) for e in self.b.entries]
+
+    @property
+    def list(self):
+        return self.b.list
+
+    def refresh(self):
+        self.b.refresh()
+
+    @property
+    def title(self):
+        return f"{self.b.folder} - My Files" if len(self.b.folder) < 14 else self.b.folder
 
     def draw(self, ui: UI, r0, c0, r1, c1):
-        self.refresh()
-        rows = [f"{n:<13}{k}" for n, k, p in self.items]
-        ui.listbox(r0, r1 - 1, c0, c1, rows, self.list, on_open=lambda i: self.open())
-        has = bool(self.items)
-        ui.button(r1, c0, c0 + 5, "Open", self.open, enabled=has)
-        ui.button(r1, c0 + 7, c0 + 12, "Run", self.run, enabled=has and self._sel()[1] == "Program")
-        ui.button(r1, c0 + 14, c0 + 20, "Delete", self.delete, enabled=has)
-        ui.button(r1, c0 + 22, c1, "Bin", lambda: self.os.launch("bin"))
+        ui.button(r0, c0, c0 + 3, "Up", self.up_)
+        ui.sc.fill(r0, c0 + 5, r0, c1, S.FIELD)
+        ui.label(r0, c0 + 5, (self.status or self.b.error or self.b.folder)[-(c1 - c0 - 4):], S.FIELD)
+        ui.listbox(r0 + 1, r1 - 1, c0, c1, fs_rows(self.b.entries), self.b.list, on_open=lambda i: self.open())
+        has = bool(self.b.entries)
+        clip = self.os.kernel.clipboard.get("kind") == "file"
+        ui.button(r1, c0, c0 + 3, "Open", self.open, enabled=has)
+        ui.button(r1, c0 + 5, c0 + 7, "New", self.new)
+        ui.button(r1, c0 + 9, c0 + 11, "Ren", self.rename, enabled=has)
+        ui.button(r1, c0 + 13, c0 + 15, "Del", self.delete, enabled=has)
+        ui.button(r1, c0 + 17, c0 + 21, "Paste" if clip else "Copy", self.paste if clip else self.copy, enabled=has or clip)
+        ui.button(r1, c0 + 23, c1, "Edit", self.edit, enabled=has and (self.b.sel().ext == ".BAS" if has else False))
 
-    def _sel(self):
-        return self.items[self.list.sel] if self.items else ("", "", "")
+    def _try(self, fn, *a):
+        try:
+            fn(*a)
+            self.status = ""
+        except FSError as e:
+            self.status = str(e)
+            self.os.beep()
+
+    def up_(self):
+        self._try(self.b.up)
 
     def open(self):
-        name, kind, path = self._sel()
-        if not name:
+        e = self.b.sel()
+        if not e:
             return
-        if kind == "Document":
-            self.os.launch("notepad", path=path)
+        if e.is_dir:
+            self._try(self.b.go, e.path)
         else:
-            self.os.term.open_program(name[:-4], run=False)
+            self._try(self.os.kernel.open, e.path)
+
+    def edit(self):
+        e = self.b.sel()
+        if e and e.ext == ".BAS":
+            self._try(lambda: self.os.kernel.open(e.path, edit=True))
 
     def run(self):
-        name, kind, path = self._sel()
-        if kind == "Program":
-            self.os.term.open_program(name[:-4], run=True)
+        e = self.b.sel()
+        if e and e.ext == ".BAS":
+            src = self.api.fs.read_text(e.path)
+            self.os.term.open_source(os.path.splitext(e.name)[0], src, run=True)
+
+    def new(self):
+        def made(name):
+            self._try(self.api.fs.mkdir, self.b.folder + "\\" + name)
+        self.api.ui.prompt("Name for the new folder:", made, title="New Folder", free=True)
+
+    def rename(self):
+        e = self.b.sel()
+        if not e:
+            return
+        self.api.ui.prompt(f"New name for {e.name[:14]}:", lambda n: self._try(self.api.fs.rename, e.path, n),
+                           title="Rename", value=e.name, free=True)
 
     def delete(self):
-        name, kind, path = self._sel()
-        if not name:
+        e = self.b.sel()
+        if not e:
             return
+        perm = self.b.folder.upper().startswith("C:\\RECYCLED")
 
         def yes(b):
             if b == "Yes":
-                try:
-                    os.makedirs(_bin(self.os), exist_ok=True)
-                    dest = os.path.join(_bin(self.os), os.path.basename(path))
-                    if os.path.exists(dest):
-                        os.remove(dest)
-                    shutil.move(path, dest)
-                except OSError:
-                    self.os.beep()
-        self.os.launch("msg", title="Delete", text=f"Move {name} to the Recycle Bin?", buttons=("Yes", "No"), done=yes)
+                self._try(self.api.fs.delete, e.path)
+        self.api.ui.message(f"{'Delete' if perm else 'Move'} {e.name[:16]}{' for good' if perm else ' to the Recycle Bin'}?",
+                            title="Delete", buttons=("Yes", "No"), done=yes)
+
+    def copy(self):
+        e = self.b.sel()
+        if e and not e.is_dir:
+            self.os.kernel.clipboard = {"kind": "file", "data": e.path}
+            self.status = f"Copied {e.name}"
+
+    def paste(self):
+        src = self.os.kernel.clipboard.get("data", "")
+        self._try(lambda: self.api.fs.copy(src, self.b.folder))
+        self.os.kernel.clipboard = {"kind": "", "data": ""}
+
+    def typed(self, text: str) -> bool:
+        t = text.strip()
+        if t:
+            self._try(self.b.go, t)                         # type a path to go there
+        return True
+
+
+class FileDialog(App):
+    """Open or Save As: browse folders, pick or type a file name."""
+    title = "Open"
+    icon = "f"
+    short = "Open"
+    single = False
+
+    def __init__(self, os_, mode="open", types=(".TXT",), folder="C:\\Documents", name="", done=None):
+        super().__init__(os_)
+        self.mode, self.done = mode, done
+        self.title = "Open" if mode == "open" else "Save As"
+        self.short = self.title[:5]
+        self.b = Browser(self, folder, types if mode == "open" else None)
+        self.types = types
+        self.name = name
+        self.focus = 2 if mode == "save" else 1             # Save As starts in the name box, Open in the list
+
+    def set_name(self, text: str):
+        self.name = text.strip()[:32]
+
+    def typed(self, text: str) -> bool:                    # typing anywhere in the dialog is the file name
+        if text.strip():
+            self.set_name(text)
+            self.ok()
+        return True
+
+    def draw(self, ui: UI, r0, c0, r1, c1):
+        ui.button(r0, c0, c0 + 3, "Up", lambda: self._go_up())
+        ui.sc.fill(r0, c0 + 5, r0, c1, S.FIELD)
+        ui.label(r0, c0 + 5, (self.b.error or self.b.folder)[-(c1 - c0 - 4):], S.FIELD)
+        ui.listbox(r0 + 1, r1 - 2, c0, c1, fs_rows(self.b.entries), self.b.list, on_open=lambda i: self.pick(),
+                   on_select=lambda i: self._sync())
+        ui.label(r1 - 1, c0, "Name")
+        ui.field(r1 - 1, c0 + 5, c1, self.name, self.set_name, placeholder="type a file name")
+        ui.button(r1, c0 + 8, c0 + 15, "Open" if self.mode == "open" else "Save", self.ok)
+        ui.button(r1, c0 + 17, c0 + 24, "Cancel", self.back)
+
+    def _go_up(self):
+        try:
+            self.b.up()
+        except FSError:
+            self.os.beep()
+
+    def _sync(self):
+        e = self.b.sel()
+        if e and not e.is_dir:
+            self.name = e.name
+
+    def pick(self):
+        e = self.b.sel()
+        if not e:
+            return
+        if e.is_dir:
+            self.b.go(e.path)
+        else:
+            self.name = e.name
+            self.ok()
+
+    def ok(self):
+        if not self.name:
+            self.os.beep()
+            return
+        name = self.name
+        if self.mode == "save" and self.types and not os.path.splitext(name)[1]:
+            name += self.types[0].lower()
+        try:
+            path = self.api.fs.normalize(name, cwd=self.b.folder)
+            if self.mode == "open" and not self.api.fs.exists(path):
+                raise FSError(f"{name} isn't here")
+            if self.mode == "open" and self.api.fs.isdir(path):
+                self.b.go(path)
+                return
+        except FSError as e:
+            self.b.error = str(e)
+            self.os.beep()
+            return
+        if self.mode == "save" and self.api.fs.exists(path):
+            def answer(b):
+                if b == "Yes":
+                    self._finish(path)
+            self.api.ui.message(f"{name[:20]} is already there. Replace it?", title="Save As", buttons=("Yes", "No"), done=answer)
+            return
+        self._finish(path)
+
+    def _finish(self, path):
+        self.os.close(self)
+        if self.done:
+            self.done(path)
 
 
 class RecycleBin(App):
@@ -282,44 +496,35 @@ class RecycleBin(App):
         self.list = ListState()
 
     def items(self):
-        try:
-            return sorted(f for f in os.listdir(_bin(self.os)) if f.lower().endswith((".bas", ".txt")))
-        except OSError:
-            return []
+        return [n for n, orig in self.os.kernel.fs.bin_items()]
 
     def draw(self, ui: UI, r0, c0, r1, c1):
-        items = self.items()
+        items = self.os.kernel.fs.bin_items()
         if not items:
             ui.icon(r0 + 1, c0 + 3, "r")
             ui.label(r0 + 1, c0 + 7, "The bin is empty. Hoo!")
             ui.button(r1, c0 + 10, c0 + 17, "OK", self.back)
             return
-        ui.listbox(r0, r1 - 1, c0, c1, [f.upper() for f in items], self.list, on_open=lambda i: self.restore())
+        ui.listbox(r0, r1 - 2, c0, c1, [n for n, o in items], self.list, on_open=lambda i: self.restore())
+        orig = items[min(self.list.sel, len(items) - 1)][1]
+        ui.label(r1 - 1, c0, ("From " + orig)[:c1 - c0 + 1])
         ui.button(r1, c0, c0 + 8, "Restore", self.restore)
         ui.button(r1, c0 + 10, c0 + 16, "Empty", self.empty)
         ui.button(r1, c0 + 18, c1, "Close", self.back)
 
     def restore(self):
         items = self.items()
-        if not items:
-            return
-        f = items[min(self.list.sel, len(items) - 1)]
-        dest_dir = self.os.term.basic.folder if f.lower().endswith(".bas") else _docs(self.os)
-        try:
-            os.makedirs(dest_dir, exist_ok=True)
-            shutil.move(os.path.join(_bin(self.os), f), os.path.join(dest_dir, f))
-        except OSError:
-            self.os.beep()
+        if items:
+            try:
+                self.os.kernel.fs.restore(items[min(self.list.sel, len(items) - 1)])
+            except FSError:
+                self.os.beep()
 
     def empty(self):
         def yes(b):
             if b == "Yes":
-                for f in self.items():
-                    try:
-                        os.remove(os.path.join(_bin(self.os), f))
-                    except OSError:
-                        pass
-        self.os.launch("msg", title="Empty Bin", text="Delete everything in the bin for good?", buttons=("Yes", "No"), done=yes)
+                self.os.kernel.fs.empty_bin()
+        self.api.ui.message("Delete everything in the bin for good?", title="Empty Bin", buttons=("Yes", "No"), done=yes)
 
 
 # ---------------------------------------------------------------------------------------------------------- Notepad
@@ -332,24 +537,31 @@ class Notepad(App):
 
     def __init__(self, os_, path: str = ""):
         super().__init__(os_)
-        self.path = path
+        self.path = ""
         self.lines: List[str] = [""]
         self.cur = 0
         self.top = 0
         self.changed = False
         if path:
-            try:
-                text = open(path, encoding="utf-8", errors="replace").read().replace("\r", "")
-                self.lines = [l for l in text.split("\n")] or [""]
-                if len(self.lines) > 1 and self.lines[-1] == "":
-                    self.lines.pop()
-                self.cur = len(self.lines) - 1
-            except OSError:
-                pass
+            self.load(path)
+        self._title()
+
+    def load(self, path: str):
+        try:
+            text = self.api.fs.read_text(path)
+            self.path = self.api.fs.normalize(path)
+            self.lines = text.split("\n") or [""]
+            if len(self.lines) > 1 and self.lines[-1] == "":
+                self.lines.pop()
+            self.cur, self.changed = len(self.lines) - 1, False
+            if self.path.upper().startswith("A:"):
+                self.path = ""                               # the ROM disk is read only: Save asks for a name
+        except FSError as e:
+            self.api.ui.message(str(e), title="Notepad")
         self._title()
 
     def _title(self):
-        name = os.path.basename(self.path)[:-4].upper() if self.path else "Untitled"
+        name = os.path.basename(self.path.replace("\\", "/")) if self.path else "Untitled"
         self.title = f"{name}{'*' if self.changed else ''} - Notepad"
 
     def draw(self, ui: UI, r0, c0, r1, c1):
@@ -375,10 +587,11 @@ class Notepad(App):
                 self.focus = i
                 self.cur = j
             ui.spot(r0 + k, c0, r0 + k, c1, tap)
-        ui.button(r1, c0, c0 + 4, "New", self.new)
-        ui.button(r1, c0 + 6, c0 + 11, "Open", lambda: self.os.launch("files"))
-        ui.button(r1, c0 + 13, c0 + 18, "Save", self.save)
-        ui.button(r1, c0 + 20, c1, "Del ln", self.del_line)
+        ui.button(r1, c0, c0 + 3, "New", self.new)
+        ui.button(r1, c0 + 5, c0 + 8, "Open", self.open)
+        ui.button(r1, c0 + 10, c0 + 13, "Save", self.save)
+        ui.button(r1, c0 + 15, c0 + 18, "Cut", self.cut)
+        ui.button(r1, c0 + 20, c1, "Paste", self.paste, enabled=bool(self.api.clipboard_get()))
 
     def key(self, k: str) -> bool:
         if self.focus != 0 or k not in ("up", "down"):
@@ -401,15 +614,34 @@ class Notepad(App):
         self.cur += len(parts) - 1
         self.lines.insert(self.cur + 1, "")
         self.cur += 1
+        self._dirty()
+        return True
+
+    def _dirty(self):
         self.changed = True
         self._title()
-        return True
 
     def new_line(self):
         self.lines.insert(self.cur + 1, "")
         self.cur += 1
-        self.changed = True
-        self._title()
+        self._dirty()
+
+    def cut(self):
+        self.api.clipboard_set(self.lines[self.cur])
+        if len(self.lines) > 1:
+            del self.lines[self.cur]
+            self.cur = min(self.cur, len(self.lines) - 1)
+        else:
+            self.lines = [""]
+        self._dirty()
+
+    def paste(self):
+        text = self.api.clipboard_get()
+        if text:
+            for k, line in enumerate(text.split("\n")):
+                self.lines.insert(self.cur + 1 + k, line[:120])
+            self.cur += 1
+            self._dirty()
 
     def del_line(self):
         if len(self.lines) > 1:
@@ -417,32 +649,34 @@ class Notepad(App):
             self.cur = min(self.cur, len(self.lines) - 1)
         else:
             self.lines = [""]
-        self.changed = True
-        self._title()
+        self._dirty()
 
     def new(self):
         self.os.launch("notepad", path="")
 
+    def open(self):
+        self.api.ui.open_file(lambda p: self.load(p), types=(".TXT", ".LOG", ".INI", ".BAS"),
+                              folder=vdirname(self.path) if self.path else "C:\\Documents")
+
     def save(self, then: Optional[Callable] = None):
         if not self.path:
-            def named(n):
-                self.path = os.path.join(_docs(self.os), n.lower() + ".txt")
+            def named(p):
+                self.path = p
                 self.save(then)
-            self.os.launch("prompt", title="Save As", prompt="Name for this note:", done=named)
+            self.api.ui.save_file(named, types=(".TXT",))
             return
         try:
-            os.makedirs(os.path.dirname(self.path), exist_ok=True)
             lines = list(self.lines)
             while len(lines) > 1 and lines[-1] == "":
                 lines.pop()
-            with open(self.path, "w", encoding="utf-8") as f:
-                f.write("\n".join(lines) + "\n")
+            self.path = self.api.fs.write_text(self.path, "\n".join(lines) + "\n")
+            self.os.kernel.add_recent(self.path)
             self.changed = False
             self._title()
             if then:
                 then()
-        except OSError:
-            self.os.beep()
+        except FSError as e:
+            self.api.ui.message(str(e), title="Notepad")
 
     def back(self):
         if not self.changed or not any(l.strip() for l in self.lines):
@@ -454,7 +688,7 @@ class Notepad(App):
                 self.save(then=lambda: self.os.close(self))
             elif b == "No":
                 self.os.close(self)
-        self.os.launch("msg", title="Notepad", text="Save your changes first?", buttons=("Yes", "No", "Back"), done=answer)
+        self.api.ui.message("Save your changes first?", title="Notepad", buttons=("Yes", "No", "Back"), done=answer)
 
 
 # ---------------------------------------------------------------------------------------------------------- Calculator
@@ -715,36 +949,131 @@ class GamesFolder(App):
         self.os.launch(START_GAMES[self.list.sel])
 
 
+# ---------------------------------------------------------------------------------------------------------- Task Manager
+class TaskManager(App):
+    title = "Task Manager"
+    icon = "K"
+    short = "Tasks"
+
+    def __init__(self, os_):
+        super().__init__(os_)
+        self.list = ListState()
+        self.rows: List[dict] = []
+
+    def tick(self):
+        return True
+
+    def draw(self, ui: UI, r0, c0, r1, c1):
+        self.rows = self.os.kernel.list()
+        ui.label(r0, c0, "PID Name            CPU ms")
+        rows = [f"{p['pid']:>3} {p['name'][:15]:<15}{p['cpu_ms']:>8}" for p in self.rows]
+        ui.listbox(r0 + 1, r1 - 1, c0, c1, rows, self.list, on_open=lambda i: self.end())
+        ui.button(r1, c0, c0 + 8, "End task", self.end, enabled=bool(self.rows))
+        ui.label(r1, c0 + 10, f"{len(self.rows)} running")
+        ui.button(r1, c1 - 6, c1, "Close", self.back)
+
+    def end(self):
+        if not self.rows:
+            return
+        p = self.rows[min(self.list.sel, len(self.rows) - 1)]
+        if p["pid"] == self.pid:
+            self.back()
+            return
+        self.os.kernel.kill(p["pid"])
+        self.api.notify(f"Ended {p['name'][:20]}")
+
+
+class RunDialog(App):
+    """Start > Run: a program name, a file path or a folder."""
+    title = "Run"
+    icon = "p"
+    short = "Run"
+    rect = (1, 2, 5, 27)
+
+    def __init__(self, os_):
+        super().__init__(os_)
+        self.value = ""
+        self.error = ""
+
+    def draw(self, ui: UI, r0, c0, r1, c1):
+        ui.label(r0, c0, "Type a program, file or folder:")
+        ui.field(r0 + 1, c0, c1, self.value, self.set_value, placeholder="NOTEPAD or C:\\Apps\\X.BAS")
+        ui.label(r0 + 2, c0, self.error[:c1 - c0 + 1])
+        ui.button(r1, c0 + 4, c0 + 9, "OK", self.ok)
+        ui.button(r1, c0 + 12, c0 + 19, "Cancel", self.back)
+
+    def set_value(self, text: str):
+        self.value = text.strip()
+        self.ok()
+
+    def ok(self):
+        v = self.value.strip()
+        if not v:
+            return
+        if ":" in v or "\\" in v or "." in v:
+            try:
+                self.os.close(self)
+                self.os.kernel.open(v)
+            except FSError as e:
+                self.os.launch("msg", title="Run", text=str(e))
+            return
+        before = len(self.os.apps)
+        self.os.close(self)
+        self.os._shortcut(v)
+        if len(self.os.apps) < before and self.os.term.mode == "gui":
+            self.os.launch("msg", title="Run", text=f"TalonOS can't find {v[:20]}.")
+
+
 # ---------------------------------------------------------------------------------------------------------- registry
 from . import tos_games  # noqa: E402  (games use the toolkit above)
 
 REGISTRY = {
     "control": {"cls": ControlPanel, "name": "Control Panel", "words": ["SETTINGS", "PANEL", "CONTROL"]},
-    "files": {"cls": Files, "name": "My Files", "words": ["FILES", "DOCUMENTS", "EXPLORER"]},
+    "explorer": {"cls": Explorer, "name": "My Files", "words": ["FILES", "EXPLORER", "COMPUTER"]},
+    "files": {"cls": Explorer, "name": "My Files", "words": ["DOCUMENTS"], "hidden": True},
+    "filedlg": {"cls": FileDialog, "name": "Open", "words": [], "hidden": True},
+    "taskmgr": {"cls": TaskManager, "name": "Task Manager", "words": ["TASKMGR", "TASKS", "PROCESSES"]},
+    "run": {"cls": RunDialog, "name": "Run...", "words": ["RUN"]},
     "bin": {"cls": RecycleBin, "name": "Recycle Bin", "words": ["BIN", "TRASH"]},
     "notepad": {"cls": Notepad, "name": "Notepad", "words": ["NOTES", "EDIT"]},
     "calc": {"cls": Calculator, "name": "Calculator", "words": ["CALC"]},
     "clock": {"cls": Clock, "name": "Date/Time", "words": ["CLOCK", "TIME", "DATE"]},
-    "sysmon": {"cls": SysMon, "name": "System Monitor", "words": ["MONITOR", "TASKS", "SYSMON"]},
+    "sysmon": {"cls": SysMon, "name": "System Monitor", "words": ["MONITOR", "SYSMON"]},
     "help": {"cls": Help, "name": "Help", "words": ["HELP"]},
     "about": {"cls": About, "name": "About TalonOS", "words": ["ABOUT", "VER"]},
     "library": {"cls": ProgramLibrary, "name": "BASIC Programs", "words": ["PROGRAMS", "LIBRARY"]},
     "games": {"cls": GamesFolder, "name": "Games", "words": ["GAMES"]},
     "shutdown": {"cls": ShutDown, "name": "Shut Down", "words": ["SHUTDOWN"]},
     "msg": {"cls": MessageBox, "name": "Message", "words": [], "hidden": True},
+    "basicapp": {"cls": None, "name": "BASIC app", "words": [], "hidden": True, "kind": "basic"},
     "prompt": {"cls": Prompt, "name": "Prompt", "words": [], "hidden": True},
 }
 REGISTRY.update(tos_games.GAMES)
+from .tos_basicapp import BasicApp  # noqa: E402
+REGISTRY["basicapp"]["cls"] = BasicApp
 START_GAMES = list(tos_games.GAMES.keys())
 
-START_MENU = [
-    ("Programs", 0, ["library", "basic", "terminal", "files"]),
-    ("Accessories", 0, ["notepad", "calc", "clock", "sysmon"]),
-    ("Games", 0, START_GAMES),
-    ("Documents", 0, "files"),
-    ("Settings", 0, ["control", "clock", "sysmon"]),
-    ("Help", 0, "help"),
-    ("Shut Down...", 2, "shutdown"),
-]
+def start_menu(desktop):
+    """The Start menu, built each time it opens: installed apps and recent documents change."""
+    from .tos_basicapp import installed_apps
+    apps = installed_apps(desktop)
+    recent = desktop.kernel.registry.get("system.recent", [])
+
+    def opener(p):
+        return lambda: desktop.kernel.open(p)
+    docs = [(os.path.basename(p.replace("\\", "/"))[:16], opener(p)) for p in recent]
+    docs.append(("My Documents", lambda: desktop.launch("explorer", path="C:\\Documents")))
+    return [                     # like the classic Start menu: label, underlined letter, app or submenu
+        ("Programs", 0, ["library", "basic", "terminal", "explorer", "taskmgr"] + apps),
+        ("Accessories", 0, ["notepad", "calc", "clock", "sysmon"]),
+        ("Games", 0, START_GAMES),
+        ("Documents", 0, docs),
+        ("Settings", 0, ["control", "help", "about"]),
+        ("Run...", 0, "run"),
+        ("Shut Down...", 2, "shutdown"),
+    ]
+
+
+START_MENU = []                  # kept for older imports; the menu is start_menu(desktop) now
 REGISTRY["basic"] = {"cls": None, "name": "BASIC", "words": ["CODE"]}
 REGISTRY["terminal"] = {"cls": None, "name": "Terminal", "words": ["CMD", "PROMPT", "DOS"]}
