@@ -22,7 +22,14 @@ def main():
 
     if not ui.single_instance():
         return
-    app = TalonSyncApp(args.data)
+    try:
+        app = TalonSyncApp(args.data)
+    except RuntimeError as e:                      # 1.15.3: e.g. the database is locked by another program
+        print(e, flush=True)
+        if sys.platform == "win32":
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(None, str(e), "TalonSync", 0x30)
+        return
     if args.demo:
         app.settings.update({"demo_pda": True})
     app.start()

@@ -320,9 +320,21 @@ class Database:
 
     def load(self):
         if os.path.exists(self.path):
+            # 1.15.3: a file another program has open (antivirus, OneDrive, a backup tool) is not a broken file: wait for
+            # it, and if it stays locked, stop rather than start empty and later save the sample records over it
+            for attempt in range(10):
+                try:
+                    with open(self.path, encoding="utf-8") as f:
+                        text = f.read()
+                    break
+                except OSError as e:
+                    if attempt == 9:
+                        self.read_only = True
+                        raise RuntimeError(f"TalonSync couldn't open its database ({e}). Another program may be using "
+                                           f"{self.path}. Close it (or restart Windows) and start TalonSync again.") from e
+                    time.sleep(0.5)
             try:
-                with open(self.path, encoding="utf-8") as f:
-                    self.from_dict(json.load(f))
+                self.from_dict(json.loads(text))
                 return
             except Exception as e:  # keep the broken file, start clean
                 broken = self.path + f".broken-{int(time.time())}"
@@ -334,13 +346,27 @@ class Database:
         self.seed()
 
     def save(self):
+        if getattr(self, "read_only", False):
+            return
         with self.lock:
             data = json.dumps(self.to_dict(), indent=1)
         os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(self.path) or ".", suffix=".tmp")
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(data)
-        os.replace(tmp, self.path)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(data)
+                f.flush(); os.fsync(f.fileno())
+            for attempt in range(5):                      # 1.15.3: an antivirus lock usually lasts a moment
+                try:
+                    os.replace(tmp, self.path)
+                    return
+                except PermissionError:
+                    if attempt == 4: raise
+                    time.sleep(0.2)
+        finally:
+            if os.path.exists(tmp):
+                try: os.unlink(tmp)
+                except OSError: pass
 
     def snapshot(self) -> dict:
         return copy.deepcopy(self.to_dict())

@@ -8,6 +8,7 @@ every value it has seen.
 from __future__ import annotations
 
 import socket
+import sys
 import struct
 import threading
 import time
@@ -131,7 +132,12 @@ class OscLink:
         self.stop()
         try:
             rx = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            rx.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if sys.platform == "win32":
+                # 1.15.3: on Windows SO_REUSEADDR lets two apps share the port and split VRChat's messages silently;
+                # exclusive use makes "port in use" show up as the error it is
+                rx.setsockopt(socket.SOL_SOCKET, getattr(socket, "SO_EXCLUSIVEADDRUSE", -5), 1)
+            else:
+                rx.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             rx.bind(self.listen_addr)
             rx.settimeout(0.25)
         except OSError as e:
@@ -222,7 +228,10 @@ class OscLink:
             self._tx.sendto(encode_message(address, *args), self.send_addr)
             self.tx_count += 1
         except OSError as e:
-            self.log(f"OSC send failed: {e}")
+            now = time.time()                       # 1.15.3: once every 10 s at most, not once per message
+            if now - getattr(self, "_send_err_at", 0) > 10:
+                self._send_err_at = now
+                self.log(f"OSC send failed: {e}")
 
     def set(self, name: str, value: Any):
         """Set an avatar parameter (bool, int or float - match the parameter's type)."""

@@ -7,6 +7,7 @@ import json
 import mimetypes
 import os
 import secrets
+import shutil
 import sys
 import tempfile
 import threading
@@ -280,6 +281,8 @@ class _Handler(BaseHTTPRequestHandler):
                 set_autostart(after["start_with_windows"])
             return self._json(after)
         if route == "settings/reset":
+            if app.syncer and app.syncer.busy:
+                return self._json({"error": "A TalonSync is running: try again when it finishes."}, 409)
             from copy import deepcopy
             app.settings.data = deepcopy(DEFAULTS)
             app.settings.data["first_run"] = False
@@ -316,18 +319,23 @@ class _Handler(BaseHTTPRequestHandler):
         if route == "weather/push":
             return self._json({"message": app.push_weather()})
         if route == "reconnect":
+            if app.syncer and app.syncer.busy:
+                return self._json({"error": "A TalonSync is running: try again when it finishes."}, 409)
             app.connect()
             return self._json({"ok": True})
         if route == "import":
             tmp = tempfile.mkdtemp(prefix="talonsync-import-")
-            paths = []
-            for f in b.get("files", []):
-                name = os.path.basename(f.get("name") or "import.txt")
-                p = os.path.join(tmp, name)
-                with open(p, "wb") as fh:
-                    fh.write(base64.b64decode(f.get("data", "")))
-                paths.append(p)
-            res = app.import_files(paths, b.get("target", "auto"))
+            try:
+                paths = []
+                for f in b.get("files", []):
+                    name = os.path.basename(f.get("name") or "import.txt")
+                    p = os.path.join(tmp, name)
+                    with open(p, "wb") as fh:
+                        fh.write(base64.b64decode(f.get("data", "")))
+                    paths.append(p)
+                res = app.import_files(paths, b.get("target", "auto"))
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)     # 1.15.3: don't leave the uploaded copies in %TEMP%
             return self._json(res)
         if route == "export_all":
             folder = b.get("folder") or os.path.join(os.path.expanduser("~"), "Documents", "TalonSync Export")

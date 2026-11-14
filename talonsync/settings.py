@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import threading
+import time
 from copy import deepcopy
 
 CONDUITS = ["settings", "tasks", "memos", "calendar", "contacts", "notepad", "hypno"]
@@ -144,10 +145,21 @@ class Settings:
                     if self.data.get("theme") == "aerie": self.data["theme"] = "mint"
                     if str(self.data.get("accent", "")).lower() == "#4f8cff": self.data["accent"] = "#7dc79a"
                     self.data["look_mint"] = True
+        except OSError as e:
+            # 1.15.3: locked, not broken: keep the file and don't save defaults over it this session
+            self.read_only = True
+            print(f"TalonSync: settings couldn't be read ({e}); using defaults for now without saving over them")
         except Exception as e:
-            print(f"TalonSync: settings unreadable ({e}), using defaults")
+            broken = self.path + f".broken-{int(time.time())}"
+            try:
+                os.replace(self.path, broken)
+            except OSError:
+                pass
+            print(f"TalonSync: settings unreadable ({e}), using defaults (the old file is kept as {broken})")
 
     def save(self):
+        if getattr(self, "read_only", False):
+            return
         with self.lock:
             os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
             tmp = self.path + ".tmp"
@@ -190,7 +202,8 @@ class Settings:
                 if k == "conduits":
                     v = {c: (v.get(c) if v.get(c) in ACTIONS else "sync") for c in CONDUITS}
                 if k.endswith("_port"):
-                    v = max(0, min(65535, v))
+                    if not 1 <= v <= 65535:
+                        continue                  # 1.15.3: an emptied port field keeps the old port (0 never works)
                 self.data[k] = v
         if save:
             self.save()

@@ -497,11 +497,16 @@ const TS = {
       h(`<button class="btn ${s.ts_music ? "primary" : ""}" id="ts-jazz">${icon("jazz")}${s.ts_music ? "Jazz on" : "Jazz off"}</button>`),
       h(`<button class="btn" id="ts-full" title="Full screen">${icon("full")}</button>`));
     const cv = $("#ts-canvas", el);
+    const token = this.token = (this.token || 0) + 1;     // 1.15.3: a quicker visit after this one wins
+    if (this.star) this.star.stop();
+    clearInterval(this.timer);
     this.star = new TalonStar(cv);
     this.star.setSettings(this.settingsFor(s));
     new ResizeObserver(() => this.star && this.star.resize()).observe($("#ts-stage", el));
     await this.refresh();
+    if (token !== this.token || S.view !== "talonstar" || !this.star) return;   // left (or came back) meanwhile
     this.star.start();
+    clearInterval(this.timer);
     this.timer = setInterval(() => this.refresh(), 60000);
     $("#ts-next").onclick = () => this.star.next();
     $("#ts-prev").onclick = () => this.star.prevPage();
@@ -587,7 +592,7 @@ const TS = {
     $("#ts-open").onclick = () => safely(() => api("remote", { action: "open_app", app: 27 }), (r) => r.message);
     $("#ts-ref").onclick = () => safely(() => api("weather/refresh", {}), "Checking the sky...").then(() => setTimeout(() => this.refresh(), 3000));
   },
-  leave() { if (this.star) this.star.stop(); this.star = null; clearInterval(this.timer); this.jazz.stop(); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); },
+  leave() { this.token = (this.token || 0) + 1; if (this.star) this.star.stop(); this.star = null; clearInterval(this.timer); this.jazz.stop(); if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); },
 };
 document.addEventListener("pointerdown", () => { if (TS.jazz.want && TS.jazz.blocked) TS.jazz.ctx.resume(); }, true);
 R.talonstar = (el, tools) => TS.enter(el, tools);

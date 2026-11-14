@@ -65,6 +65,7 @@ class PdaMirror:
         self.last_snapshot = 0.0
         self.offer: Optional[Dict] = None        # a wiped PDA was found: {"avatar", "cells_now", "cells_saved", "from"}
         self.restoring = False
+        self._load_seq = 0                       # 1.15.3: which /avatar/change is the newest
         os.makedirs(self.folder, exist_ok=True)
 
     # ------------------------------------------------------------ files
@@ -130,10 +131,22 @@ class PdaMirror:
 
     # ------------------------------------------------------------ live: called for every OSC message
     def on_osc(self, addr: str, args):
-        if not self.settings.get("live_backup", True) or self.restoring:
+        if not self.settings.get("live_backup", True):
             return
         if addr == "/avatar/change":
-            threading.Thread(target=self._avatar_loaded, args=(str(args[0]) if args else "",), daemon=True).start()
+            # 1.15.3: the avatar we were wearing keeps its copy now, and nothing is recorded until the new avatar has
+            # been compared with its own copy (values VRChat sends while it loads would otherwise overwrite the good
+            # copy, or land in the wrong avatar's file)
+            with self.lock:
+                if self.avatar and self.values:
+                    self._save()
+                self.avatar = None
+                self.offer = None
+                self._load_seq += 1
+                seq = self._load_seq
+            threading.Thread(target=self._avatar_loaded, args=(str(args[0]) if args else "", seq), daemon=True).start()
+            return
+        if self.restoring:
             return
         if not addr.startswith("/avatar/parameters/TP/") or not args:
             return
@@ -159,13 +172,13 @@ class PdaMirror:
                 self.snapshot("auto")
 
     # ------------------------------------------------------------ avatar loaded: wiped?
-    def _avatar_loaded(self, avatar: str):
+    def _avatar_loaded(self, avatar: str, seq: int = 0):
         time.sleep(4.0)                                   # let VRChat load the avatar and its saved values
         fresh = {k: v for k, v in (self.query_fn() or {}).items() if is_saved(k) and isinstance(v, (bool, int, float))}
         saved = self._load(avatar).get("values", {})
         with self.lock:
-            if self.avatar and self.values and self.avatar != avatar:
-                self._save()                              # the avatar we were wearing keeps its copy
+            if seq and seq != self._load_seq:
+                return                                    # another avatar was loaded meanwhile: that one wins
             self.avatar = avatar
             self.values = dict(saved)
             self.values.update(fresh)                     # what the PDA has now wins, except a wipe (below)

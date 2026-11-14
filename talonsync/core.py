@@ -6,6 +6,7 @@ import collections
 import glob
 import json
 import os
+import re
 import shutil
 import sys
 import threading
@@ -53,6 +54,7 @@ class TalonSyncApp:
         self._req_prev = False
         self._on_prev = False
         self._stop = threading.Event()
+        self._connect_lock = threading.RLock()
         self._watch_seen: Dict[str, float] = {}
         self.started = time.time()
         from .mirror import PdaMirror                   # 1.15: live backup of the PDA's saved memory
@@ -65,7 +67,13 @@ class TalonSyncApp:
         line = f"{datetime.now():%H:%M:%S}  {msg}"
         self.log_lines.append(line)
         try:
-            with open(os.path.join(self.dir, "talonsync.log"), "a", encoding="utf-8") as f:
+            path = os.path.join(self.dir, "talonsync.log")
+            try:                                          # 1.15.3: keep the log file small (one old copy is kept)
+                if os.path.getsize(path) > 2_000_000:
+                    os.replace(path, path + ".old")
+            except OSError:
+                pass
+            with open(path, "a", encoding="utf-8") as f:
                 f.write(f"{datetime.now():%Y-%m-%d} {line}\n")
         except OSError:
             pass
@@ -113,6 +121,10 @@ class TalonSyncApp:
 
     def connect(self):
         """(Re)open the OSC link with the current settings."""
+        with self._connect_lock:                   # 1.15.3: two settings changes at once must not leak a link
+            self._connect()
+
+    def _connect(self):
         if self.oscq:
             self.oscq.stop(); self.oscq = None
         if self.link:
@@ -247,13 +259,24 @@ class TalonSyncApp:
     # ------------------------------------------------------------ backups
     def backup(self, label: str = "") -> str:
         os.makedirs(self.backup_dir, exist_ok=True)
-        name = f"TalonSync {datetime.now():%Y-%m-%d %H%M%S}{(' ' + label) if label else ''}.json"
+        stamp = f"TalonSync {datetime.now():%Y-%m-%d %H%M%S}"
+        name = f"{stamp}{(' ' + label) if label else ''}.json"
+        n = 2
+        while os.path.exists(os.path.join(self.backup_dir, name)):      # 1.15.3: two in one second never overwrite
+            name = f"{stamp}-{n}{(' ' + label) if label else ''}.json"; n += 1
         path = os.path.join(self.backup_dir, name)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(self.db.to_dict(), f, indent=1)
+        # 1.15.3: the routine backups (after every sync) are pruned on their own, so they never push out the named
+        # safety backups ("before restore", "before clearing", "manual"...), which keep their own, separate count
         keep = max(1, int(self.settings.get("backup_keep", 20)))
+        stamp_only = re.compile(r"^TalonSync \d{4}-\d\d-\d\d \d{6}(-\d+)?\.json$")
         files = sorted(glob.glob(os.path.join(self.backup_dir, "TalonSync *.json")))
-        for old in files[:-keep]:
+        routine = [f for f in files if stamp_only.match(os.path.basename(f))]
+        named = [f for f in files if not stamp_only.match(os.path.basename(f))]
+        for old in routine[:-keep] + named[:-keep]:
+            if os.path.basename(old) == name:
+                continue
             try:
                 os.remove(old)
             except OSError:
@@ -586,12 +609,19 @@ class TalonSyncApp:
         last_auto = time.time()
         last_save_rev = self.db.revision
         while not self._stop.wait(2.0):
+            # 1.15.3: each chore on its own, so one failing (e.g. a locked backup file) never stops the others
             try:
                 self.mirror.tick()
+            except Exception as e:
+                self.log(f"live backup: {e}")
+            try:
                 # autosave edits
                 if self.db.revision != last_save_rev and not (self.syncer and self.syncer.busy):
                     self.db.save()
                     last_save_rev = self.db.revision
+            except Exception as e:
+                self.log(f"autosave: {e}")
+            try:
                 # scheduled TalonSync
                 m = int(self.settings.get("auto_sync_minutes", 0))
                 if m > 0 and time.time() - last_auto > m * 60:

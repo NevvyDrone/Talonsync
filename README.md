@@ -282,4 +282,4 @@ Your data lives in `%APPDATA%\TalonSync`. For a portable copy, put an empty `por
 The PDA's animator is the CPU. TalonSync talks to it through a pseudo-serial bus made of avatar parameters: address and data lines, a clock, and an acknowledge. The protocol is in `talonsync/protocol.py` and `Editor/TalonPilotAnimatorBus.cs`.
 
 - `tests/test_fake_sync.py` syncs against a pretend PDA over real UDP.
-- `tests/real_animator_sync.py` syncs against the real generated animator through a VRChat-like bridge.
+- `tests/real_animator_sync.py` syncs against the real Talon Pilot animator through a VRChat-like bridge.

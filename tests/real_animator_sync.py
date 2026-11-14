@@ -1,4 +1,4 @@
-"""TalonSync against the REAL generated animator (run gen/cscheck/bridge.ps1 first)."""
+"""TalonSync against the real Talon Pilot animator, run through a VRChat-like bridge (a developer test)."""
 import os, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from talonsync.osc import OscLink

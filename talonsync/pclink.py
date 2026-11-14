@@ -358,7 +358,8 @@ class PcLink:
         if addr == "/talonpilot/message":
             a = [str(x) for x in (args or [])]
             if a:
-                self.message(a[0], a[1] if len(a) > 1 else "")
+                # 1.15.3: off the OSC thread (sending waits for the PDA's acknowledgements, which arrive on that thread)
+                threading.Thread(target=self.message, args=(a[0], a[1] if len(a) > 1 else ""), daemon=True).start()
             return True
         return False
 

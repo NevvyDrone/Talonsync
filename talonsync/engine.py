@@ -11,6 +11,7 @@ A sync, step by step:
 """
 from __future__ import annotations
 
+import copy
 import re
 import threading
 import time
@@ -244,6 +245,9 @@ class SyncEngine:
         written = [0]
         self._reset_queue()
         with db.lock:
+            # 1.15.3: the conduits record the PDA as already matching before the writes go out; if a write then fails,
+            # this puts the old sync state back, so the next sync still sees the PC edits as edits (not as PDA changes)
+            base_before = copy.deepcopy(db.base)
             self._settings_conduit(pda_prefs)
             self._hypno_conduit(pda_lines, info)
             for kind in ("tasks", "memos", "events", "contacts"):
@@ -257,13 +261,19 @@ class SyncEngine:
             db.base.count += 1
             db.touch()
         # the writes collected above go out now, stage by stage
-        for stage, ops in self._writes:
-            for op in ops:
-                self._stage(stage, 0.45 + 0.45 * written[0] / max(1, self._n_writes))
-                op()
-                written[0] += 1
-        if self._prefs_written:
-            bus.reload()
+        try:
+            for stage, ops in self._writes:
+                for op in ops:
+                    self._stage(stage, 0.45 + 0.45 * written[0] / max(1, self._n_writes))
+                    op()
+                    written[0] += 1
+            if self._prefs_written:
+                bus.reload()
+        except BaseException:
+            with db.lock:
+                db.base = base_before
+                db.touch()
+            raise
 
         # ---------------- backup
         self._stage(pr.STAGE_BACKUP, 0.93, "Backing up...")
